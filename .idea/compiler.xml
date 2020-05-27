@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="hj-simulation" />
+        <module name="hj-server" />
+        <module name="hj-main" />
+        <module name="hj-parser" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="hj-main" options="-parameters" />
+      <module name="hj-parser" options="-parameters" />
+      <module name="hj-server" options="-parameters" />
+      <module name="hj-simulation" options="-parameters" />
+      <module name="hj-springboot" options="" />
+    </option>
+  </component>
+</project>
