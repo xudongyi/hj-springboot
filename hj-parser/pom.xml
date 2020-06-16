@@ -10,6 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hj-parser</artifactId>
-
-
+    <dependencies>
+        <!--用来解析212报文-->
+        <dependency>
+            <groupId>com.github.xiaoyao9184</groupId>
+            <artifactId>hj-t212-parser</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../third-libs/hj-t212-parser.jar</systemPath>
+        </dependency>
+    </dependencies>
 </project>

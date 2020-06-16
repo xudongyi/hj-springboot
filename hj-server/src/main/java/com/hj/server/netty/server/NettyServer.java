@@ -1,6 +1,6 @@
-package com.hj.server.server;
+package com.hj.server.netty.server;
 
-import com.hj.server.initial.ServerChannelInitializer;
+import com.hj.server.netty.initial.ServerChannelInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;

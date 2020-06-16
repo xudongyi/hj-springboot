@@ -6,10 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="hj-simulation" />
-        <module name="hj-server" />
         <module name="hj-main" />
+        <module name="hj-server" />
         <module name="hj-parser" />
+        <module name="hj-simulation" />
       </profile>
     </annotationProcessing>
   </component>

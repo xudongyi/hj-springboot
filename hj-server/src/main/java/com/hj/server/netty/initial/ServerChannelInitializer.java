@@ -1,6 +1,6 @@
-package com.hj.server.initial;
+package com.hj.server.netty.initial;
 
-import com.hj.server.handler.NettyServerHandler;
+import com.hj.server.netty.handler.NettyServerHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.string.StringDecoder;

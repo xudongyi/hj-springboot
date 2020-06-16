@@ -1,10 +1,10 @@
-package com.hj;
+package com.hj.server;
 
-import com.hj.server.server.NettyServer;
+import com.hj.server.netty.server.NettyServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.Context;
 import org.apache.tomcat.util.scan.StandardJarScanner;
-import org.springframework.beans.factory.annotation.Value;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -18,10 +18,11 @@ import java.net.UnknownHostException;
 
 @Slf4j
 @SpringBootApplication
-public class HjApplication {
+@MapperScan("com.hj.server.business.mapper")
+public class HjServerApplication {
     public static void main(String[] args) throws UnknownHostException {
 
-        ConfigurableApplicationContext application = SpringApplication.run(HjApplication.class, args);
+        ConfigurableApplicationContext application = SpringApplication.run(HjServerApplication.class, args);
         Environment env = application.getEnvironment();
         String ip = InetAddress.getLocalHost().getHostAddress();
         String serverPort = env.getProperty("server.port");
@@ -34,7 +35,6 @@ public class HjApplication {
                 "Local: \t\thttp://localhost:" + serverPort + path + "/\n\t" +
                 "External: \thttp://" + ip + ":" + serverPort + path + "/\n\t" +
                 "----------------------------------------------------------");
-
     }
 
     /**
