@@ -152,4 +152,5 @@ spring:
     port: 6379
 hj:
   server:
-    port: 80000
+    address: 127.0.0.1 #数据接收程序的ip
+    port: 61234 #数据接收程序的端口号

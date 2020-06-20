@@ -20,17 +20,6 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  mail:
-    host: smtp.163.com
-    username: jeecgos@163.com
-    password: ??
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
   ## quartz定时任务,采用数据库方式
   quartz:
     job-store-type: jdbc
@@ -152,4 +141,5 @@ spring:
     port: 6379
 hj:
   server:
-    port: 80000
+    address: 127.0.0.1 #数据接收程序的ip
+    port: 61234 #数据接收程序的端口号

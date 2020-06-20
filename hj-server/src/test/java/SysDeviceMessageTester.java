@@ -1,4 +1,3 @@
-import com.alibaba.fastjson.JSON;
 import com.hj.server.HjServerApplication;
 import com.hj.server.business.entity.SysDeviceMessage;
 import com.hj.server.business.entity.SysDeviceMessageEnum;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = HjServerApplication.class)
@@ -40,7 +38,6 @@ public class SysDeviceMessageTester {
             sysDeviceMessage.setMn(data.getMn());
             SysDeviceMessageEnum IS_RECIEVE =  SysDeviceMessageEnum.IS_RECIEVE;
             sysDeviceMessage.setFlag(IS_RECIEVE.code());
-            sysDeviceMessage.setContentJson(JSON.toJSONString(data));
             Assert.assertEquals(1,sysDeviceMessageMapper.insert(sysDeviceMessage));
         } catch (IOException e) {
             e.printStackTrace();
