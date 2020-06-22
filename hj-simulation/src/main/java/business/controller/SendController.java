@@ -15,7 +15,9 @@ public class SendController {
     public String sendData(HttpServletRequest request, AnalogData v){
         DataCache.ANALOG_DATA_CACHE = v;
         //DataCache.saveAnalogData();
-        AnalogDataSendService.send(v);
+        if (AnalogDataSendService.isStop()) {
+            AnalogDataSendService.send(v);
+        }
         return "success";
     }
 
