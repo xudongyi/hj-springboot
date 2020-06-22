@@ -6,10 +6,7 @@ import business.message.*;
 import business.netty.client.NettyClient;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class AnalogDataSendService {
     private static Thread thread = null;
@@ -35,26 +32,19 @@ public class AnalogDataSendService {
                             if (nc != null) {
                                 int minute = now.getMinutes();
                                 int hour = now.getHours();
-                                Iterator var8 = analogDataBean.keySet().iterator();
-
-                                String mn;
+                                Set<String> mns = analogDataBean.keySet();
                                 BaseMessage message;
                                 String cmd;
-                                while (var8.hasNext()) {
-                                    mn = (String) var8.next();
+                                for (String mn : mns) {
                                     message = analogDataBean.get(mn);
                                     cmd = message.current();
                                     if (StringUtils.isNotEmpty(cmd)) {
                                         nc.send(SendService.convertContent(cmd, mn, 1));
                                     }
                                 }
-
-                                DataCache.ANALOG_DATA_CACHE.getAirMN();
                                 if (minute % 10 == 0) {
-                                    var8 = analogDataBean.keySet().iterator();
-
-                                    while (var8.hasNext()) {
-                                        mn = (String) var8.next();
+                                    mns = analogDataBean.keySet();
+                                    for (String mn : mns) {
                                         message = analogDataBean.get(mn);
                                         cmd = message.minute();
                                         if (StringUtils.isNotEmpty(cmd)) {
@@ -64,10 +54,9 @@ public class AnalogDataSendService {
                                 }
 
                                 if (minute == 0) {
-                                    var8 = analogDataBean.keySet().iterator();
+                                    mns = analogDataBean.keySet();
 
-                                    while (var8.hasNext()) {
-                                        mn = (String) var8.next();
+                                    for (String mn : mns) {
                                         message = analogDataBean.get(mn);
                                         cmd = message.hour();
                                         if (StringUtils.isNotEmpty(cmd)) {
@@ -77,10 +66,9 @@ public class AnalogDataSendService {
                                 }
 
                                 if (minute == 0 && hour == 0) {
-                                    var8 = analogDataBean.keySet().iterator();
+                                    mns = analogDataBean.keySet();
 
-                                    while (var8.hasNext()) {
-                                        mn = (String) var8.next();
+                                    for (String mn : mns) {
                                         message = analogDataBean.get(mn);
                                         cmd = message.day();
                                         if (StringUtils.isNotEmpty(cmd)) {

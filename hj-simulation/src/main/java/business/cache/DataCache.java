@@ -91,4 +91,40 @@ public class DataCache {
 
         ANALOG_DATA_CLIENT.clear();
     }
+
+    public static NettyClient getForwardClient(String ipPort) {
+        if (FORWARD_CLIENT.containsKey(ipPort)) {
+            return FORWARD_CLIENT.get(ipPort);
+        } else {
+            if (StringUtils.isNotEmpty(ipPort)) {
+                String[] ip_port = ipPort.split(":");
+                if (ip_port.length == 2) {
+                    NettyClient nc = null;
+
+                    try {
+                        nc = new NettyClient(ip_port[0], Integer.valueOf(ip_port[1]), null);
+                        FORWARD_CLIENT.put(ipPort, nc);
+                        return nc;
+                    } catch (Exception var4) {
+                        var4.printStackTrace();
+                    }
+                }
+            }
+
+            return null;
+        }
+    }
+
+    public static void clearForwardClient() {
+        if (!FORWARD_CLIENT.isEmpty()) {
+            Iterator var1 = FORWARD_CLIENT.keySet().iterator();
+
+            while(var1.hasNext()) {
+                String key = (String)var1.next();
+                FORWARD_CLIENT.get(key).closed();
+            }
+        }
+
+        FORWARD_CLIENT.clear();
+    }
 }

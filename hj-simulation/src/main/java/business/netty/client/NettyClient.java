@@ -74,7 +74,7 @@ public class NettyClient {
      * 初始化Netty客户端
      */
     public void initial() {
-        synchronized(this.isConnecting) {
+        synchronized (this.isConnecting) {
             if (!this.isConnecting) {
                 this.isConnecting = true;
                 this.nettyClientThread = new Thread() {
@@ -137,6 +137,7 @@ public class NettyClient {
             if (this.id != null) {
                 String date = DateUtil.formatDateTime(new Date());
                 msg = "[" + date + "]发送数据:" + msg;
+                log.warn(msg);
                 final String broadcastMsg = this.id + "," + msg;
                 DataCache.THREAD_POOL_CACHE.execute(() -> {
                             for (String sseId : DataCache.TRANSFER_CLIENT_SEND.keySet()) {
@@ -158,40 +159,40 @@ public class NettyClient {
             if (this.id.equals("ANALOG-DATA")) {
                 this.send(ReverseService.excute(msg));
             } else {
-                String msg_ = "[" + DateUtil.format(new Date(),"yy-MM-dd HH:mm:ss") + "]接收数据:" + msg;
+                String date = DateUtil.formatDateTime(new Date());
+                String msg_ = "[" + date + "]接收数据:" + msg;
                 String broadcastMsg = this.id + "," + msg_;
-                DataCache.THREAD_POOL_CACHE.execute(new Runnable() {
-                    public void run() {
-                        Iterator var2 = DataCache.TRANSFER_CLIENT_REV.keySet().iterator();
-                        while(var2.hasNext()) {
-                            String sseId = (String)var2.next();
-                            (DataCache.TRANSFER_CLIENT_REV.get(sseId)).add(broadcastMsg);
-                        }
-
+                log.warn(msg_);
+                DataCache.THREAD_POOL_CACHE.execute(() -> {
+                    Iterator var2 = DataCache.TRANSFER_CLIENT_REV.keySet().iterator();
+                    while (var2.hasNext()) {
+                        String sseId = (String) var2.next();
+                        (DataCache.TRANSFER_CLIENT_REV.get(sseId)).add(broadcastMsg);
                     }
+
                 });
             }
         } else {
-            DataCache.THREAD_POOL_CACHE.execute(()->{
-                    int mn_index = msg.indexOf("MN=");
-                    if (mn_index != -1) {
-                        try {
-                            String mn = msg.substring(mn_index + 3, msg.indexOf(";", mn_index));
-                            ChannelHandlerContext ctx = DataCache.REVERSE_CTX_CACHE.get(mn);
-                            if (ctx != null && ctx.channel().isActive()) {
-                                ctx.writeAndFlush(Unpooled.copiedBuffer(msg + "\r\n", CharsetUtil.UTF_8));
-                            } else {
-                                ReverseBean v = new ReverseBean();
-                                v.setContent(msg);
-                                v.setCreateTime(new Date());
-                                (DataCache.REVERSE_CMD_CACHE.computeIfAbsent(mn, (k) -> {
-                                    return new ArrayList();
-                                })).add(v);
-                            }
-                        } catch (Exception var5) {
-                            var5.printStackTrace();
+            DataCache.THREAD_POOL_CACHE.execute(() -> {
+                int mn_index = msg.indexOf("MN=");
+                if (mn_index != -1) {
+                    try {
+                        String mn = msg.substring(mn_index + 3, msg.indexOf(";", mn_index));
+                        ChannelHandlerContext ctx = DataCache.REVERSE_CTX_CACHE.get(mn);
+                        if (ctx != null && ctx.channel().isActive()) {
+                            ctx.writeAndFlush(Unpooled.copiedBuffer(msg + "\r\n", CharsetUtil.UTF_8));
+                        } else {
+                            ReverseBean v = new ReverseBean();
+                            v.setContent(msg);
+                            v.setCreateTime(new Date());
+                            (DataCache.REVERSE_CMD_CACHE.computeIfAbsent(mn, (k) -> {
+                                return new ArrayList();
+                            })).add(v);
                         }
+                    } catch (Exception var5) {
+                        var5.printStackTrace();
                     }
+                }
 
             });
         }

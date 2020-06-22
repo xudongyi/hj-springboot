@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 
 /**
@@ -21,34 +22,33 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
     public NettyServerHandler(NettyServer ns) {
         this.ns = ns;
     }
+
     @Override
-    protected void channelRead0(final ChannelHandlerContext ctx, final String msg){
+    protected void channelRead0(final ChannelHandlerContext ctx, final String msg) {
         if (StringUtils.isNotEmpty(msg) && !RevService.isRefuse(ctx)) {
             this.ns.read(msg, ctx);
             RevService.reply(ctx, msg, this.ns.getPort());
-            DataCache.THREAD_POOL_CACHE.execute(new Runnable() {
-                public void run() {
-                    int mn_index = msg.indexOf("MN=");
-                    if (mn_index != -1) {
-                        try {
-                            String mn = msg.substring(mn_index + 3, msg.indexOf(";", mn_index));
-                            List<ReverseBean> list = DataCache.REVERSE_CMD_CACHE.get(mn);
-                            if (list != null && list.size() > 0) {
-                                for( ReverseBean v :list){
-                                    ctx.writeAndFlush(Unpooled.copiedBuffer(v.getContent() + "\r\n", CharsetUtil.UTF_8));
-                                }
+            DataCache.THREAD_POOL_CACHE.execute(() -> {
+                int mn_index = msg.indexOf("MN=");
+                if (mn_index != -1) {
+                    try {
+                        String mn = msg.substring(mn_index + 3, msg.indexOf(";", mn_index));
+                        List<ReverseBean> list = DataCache.REVERSE_CMD_CACHE.get(mn);
+                        if (list != null && list.size() > 0) {
+                            for (ReverseBean v : list) {
+                                ctx.writeAndFlush(Unpooled.copiedBuffer(v.getContent() + "\r\n", CharsetUtil.UTF_8));
                             }
-
-                            synchronized(DataCache.REVERSE_CMD_CACHE) {
-                                DataCache.REVERSE_CMD_CACHE.remove(mn);
-                            }
-                        } catch (Exception e) {
-                            log.error(e.getMessage());
-                            e.printStackTrace();
                         }
-                    }
 
+                        synchronized (DataCache.REVERSE_CMD_CACHE) {
+                            DataCache.REVERSE_CMD_CACHE.remove(mn);
+                        }
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
+
             });
         }
     }
