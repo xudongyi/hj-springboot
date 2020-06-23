@@ -1,7 +1,7 @@
 package business.service;
 
 import business.cache.DataCache;
-import business.entity.BlackList;
+import business.receiver.entity.BlackList;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.net.InetSocketAddress;

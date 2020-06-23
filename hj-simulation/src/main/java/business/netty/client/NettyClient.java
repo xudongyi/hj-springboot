@@ -1,7 +1,7 @@
 package business.netty.client;
 
 import business.cache.DataCache;
-import business.entity.ReverseBean;
+import business.receiver.entity.ReverseBean;
 import business.service.ReverseService;
 import cn.hutool.core.date.DateUtil;
 import io.netty.bootstrap.Bootstrap;

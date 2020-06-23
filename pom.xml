@@ -15,14 +15,12 @@
         <relativePath/>
     </parent>
     <modules>
-        <module>hj-main</module>
-        <module>hj-server</module>
-        <module>hj-parser</module>
+        <module>hj-receiver-processor</module>
         <module>hj-simulation</module>
     </modules>
     <properties>
         <druid.version>1.1.17</druid.version>
-        <mybatis-plus.version>3.1.2</mybatis-plus.version>
+        <mybatis-plus.version>3.2.0</mybatis-plus.version>
     </properties>
     <dependencies>
         <!--集成springmvc框架并实现自动配置 -->
@@ -73,11 +71,6 @@
             <version>11.2.0.3</version>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>${mybatis-plus.version}</version>
-        </dependency>
         <!-- json -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -102,7 +95,7 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-            <version>2.5.4</version>
+            <version>2.5.7</version>
         </dependency>
         <!-- hutool工具类-->
         <dependency>

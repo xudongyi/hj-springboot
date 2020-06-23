@@ -1,7 +1,7 @@
 package business.service;
 
 import business.cache.DataCache;
-import business.entity.AnalogData;
+import business.receiver.entity.AnalogData;
 import business.message.*;
 import business.netty.client.NettyClient;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;

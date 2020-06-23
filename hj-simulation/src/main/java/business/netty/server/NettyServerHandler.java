@@ -1,7 +1,7 @@
 package business.netty.server;
 
 import business.cache.DataCache;
-import business.entity.ReverseBean;
+import business.receiver.entity.ReverseBean;
 import business.service.RevService;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.netty.buffer.Unpooled;

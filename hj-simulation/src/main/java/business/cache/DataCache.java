@@ -1,6 +1,6 @@
 package business.cache;
 
-import business.entity.*;
+import business.receiver.entity.*;
 import business.netty.client.NettyClient;
 import business.netty.server.NettyServer;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;

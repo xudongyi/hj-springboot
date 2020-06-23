@@ -6,18 +6,20 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="hj-main" />
-        <module name="hj-server" />
-        <module name="hj-parser" />
+        <module name="hj-receiver-processor" />
         <module name="hj-simulation" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="hj-main" target="1.8" />
+      <module name="hj-parser" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="hj-main" options="-parameters" />
       <module name="hj-parser" options="-parameters" />
-      <module name="hj-server" options="-parameters" />
+      <module name="hj-receiver-processor" options="-parameters" />
       <module name="hj-simulation" options="-parameters" />
       <module name="hj-springboot" options="" />
     </option>

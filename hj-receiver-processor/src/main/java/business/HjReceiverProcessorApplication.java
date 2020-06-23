@@ -3,23 +3,19 @@ package business;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.Context;
 import org.apache.tomcat.util.scan.StandardJarScanner;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 @Slf4j
 @SpringBootApplication
-@MapperScan("business.receiver.mapper")
-public class HjSimulationApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(HjSimulationApplication.class, args);
+public class HjReceiverProcessorApplication {
+
+
+
+    public static void main(String[] args){
+        SpringApplication.run(HjReceiverProcessorApplication.class, args);
     }
 
     /**

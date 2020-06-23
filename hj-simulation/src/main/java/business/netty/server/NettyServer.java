@@ -1,7 +1,7 @@
 package business.netty.server;
 
 import business.cache.DataCache;
-import business.entity.Server;
+import business.receiver.entity.Server;
 import business.netty.client.NettyClient;
 import business.service.ConvertMessageService;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -22,7 +22,6 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 @Data
 public class NettyServer {

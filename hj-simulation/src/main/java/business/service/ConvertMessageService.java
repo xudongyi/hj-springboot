@@ -1,7 +1,7 @@
 package business.service;
 
 import business.cache.DataCache;
-import business.entity.ServerConvert;
+import business.receiver.entity.ServerConvert;
 import business.util.CRC_16;
 import business.util.DataFormat;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
