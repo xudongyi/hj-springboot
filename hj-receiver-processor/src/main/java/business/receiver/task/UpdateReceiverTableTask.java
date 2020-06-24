@@ -1,6 +1,6 @@
 package business.receiver.task;
 
-import business.receiver.mapper.CommonMapper;
+import business.receiver.mapper.MyBaseMapper;
 import business.receiver.mapper.SysDeviceMessageMapper;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -23,7 +23,7 @@ public class UpdateReceiverTableTask {
     @Autowired
     private SysDeviceMessageMapper sysDeviceMessageMapper;
     @Autowired
-    private CommonMapper commonMapper;
+    private MyBaseMapper commonMapper;
 
     private static String bakSourceSql_insert_auto = "";
     private static String bakSourceSql_query_hand = "";
@@ -78,7 +78,7 @@ public class UpdateReceiverTableTask {
     private void excuteBakSourceTable() {
         String thisMonth = DateUtil.format(new Date(),"yyMM");
         String tableName = "sys_device_message_" + thisMonth;
-        if (commonMapper.checkTableExistsWithSchema(tableName)==0) {
+        if (commonMapper.checkTableExists(tableName)==0) {
             sysDeviceMessageMapper.createSysDeviceMessageTable(tableName);
         }
 

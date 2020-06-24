@@ -4,7 +4,7 @@ import business.config.MybatisPlusConfig;
 import business.processor.task.UpdateTableFieldTask;
 import business.receiver.entity.SysDeviceMessage;
 import business.receiver.entity.SysDeviceMessageEnum;
-import business.receiver.mapper.CommonMapper;
+import business.receiver.mapper.MyBaseMapper;
 import business.receiver.mapper.SysDeviceMessageMapper;
 import business.receiver.service.GpsDataService;
 import business.receiver.service.HwStoreDataService;
@@ -70,7 +70,7 @@ public class NettyServer {
     private SysDeviceMessageMapper sysDeviceMessageMapper;
 
     @Autowired(required=false)
-    private CommonMapper commonMapper;
+    private MyBaseMapper commonMapper;
 
     /**
      * PostConstruct注解用于方法上，该方法在初始化的依赖注入操作之后被执行。
@@ -131,7 +131,7 @@ public class NettyServer {
                     //插入数据到数据库
                     String thisMonth = DateUtil.format(new Date(),"yyMM");
                     String tableName = "sys_device_message_" + thisMonth;
-                    if(commonMapper.checkTableExistsWithSchema(tableName)==0){
+                    if(commonMapper.checkTableExists(tableName)==0){
                         sysDeviceMessageMapper.createSysDeviceMessageTable(tableName);
                     }
                     SysDeviceMessage deviceMessage = new SysDeviceMessage();
