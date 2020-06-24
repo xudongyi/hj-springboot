@@ -30,15 +30,13 @@ public class HwStoreDataService {
     }
 
     public void accept(final String msg, final ChannelHandlerContext ctx) {
-        this.threadPoolService.getReceivePool().execute(new Runnable() {
-            public void run() {
-                try {
-                    HwStoreDataService.this.excute(msg, ctx);
-                } catch (Exception var2) {
-                    HwStoreDataService.log.error("数据解析错误[危废]：" + msg, var2);
-                }
-
+        this.threadPoolService.getReceivePool().execute(() -> {
+            try {
+                HwStoreDataService.this.excute(msg, ctx);
+            } catch (Exception var2) {
+                HwStoreDataService.log.error("数据解析错误[危废]：" + msg, var2);
             }
+
         });
     }
 
@@ -55,13 +53,13 @@ public class HwStoreDataService {
                 String[] var8 = data;
                 int var9 = data.length;
 
-                for(int var10 = 0; var10 < var9; ++var10) {
+                for (int var10 = 0; var10 < var9; ++var10) {
                     String item = var8[var10];
                     String[] value = item.split("=");
                     dataMap.put(value[0], value[1]);
                 }
 
-                String ST = (String)dataMap.get("ST");
+                String ST = dataMap.get("ST");
                 boolean isnew;
                 if (ST.equals("SH")) {
                     if (!this.isExistStoreHistory(dataMap)) {
@@ -81,13 +79,13 @@ public class HwStoreDataService {
                     }
                 }
 
-                ctx.writeAndFlush(Unpooled.copiedBuffer("#HWSTORE#ST=" + ST + ";RESOURCE_ID=" + (String)dataMap.get("RESOURCE_ID") + ";Flag=OK&&\r\n", CharsetUtil.UTF_8));
+                ctx.writeAndFlush(Unpooled.copiedBuffer("#HWSTORE#ST=" + ST + ";RESOURCE_ID=" +dataMap.get("RESOURCE_ID") + ";Flag=OK&&\r\n", CharsetUtil.UTF_8));
             }
         }
     }
 
     private void waitPeriodCreating() {
-        for(int i = 0; HwStoreDataTask.isCreatingData && i <= 30; ++i) {
+        for (int i = 0; HwStoreDataTask.isCreatingData && i <= 30; ++i) {
             try {
                 Thread.sleep(10000L);
             } catch (InterruptedException var3) {
@@ -104,7 +102,7 @@ public class HwStoreDataService {
         params.add(data.get("WASTE_NAME"));
         List<Map<String, Object>> list = this.baseDao.sqlQuery("select * from hh_hwstore.store_current where MN=? and WASTE_CODE=? and WASTE_NAME=? ", params);
         if (list != null && list.size() > 0) {
-            String id = (String)((Map)list.get(0)).get("ID");
+            String id = (String) list.get(0).get("ID");
             this.updateCurrentStore(data, id);
         } else {
             this.insertCurrentStore(data);
@@ -117,13 +115,13 @@ public class HwStoreDataService {
         String sql = "insert into hh_hwstore.store_current(ID,MN,UPDATE_TIME,WASTE_NAME,WASTE_CODE,AMOUNT)values(?,?,?,?,?,?)";
         params.add(CommonsUtil.createUUID1());
         params.add(data.get("MN"));
-        params.add(CommonsUtil.dateParse((String)data.get("DataTime"), "yyyyMMddHHmmss"));
+        params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
         params.add(data.get("WASTE_NAME"));
         params.add(data.get("WASTE_CODE"));
         if (data.get("TOTAL_AMOUNT") != null) {
-            params.add(Double.valueOf((String)data.get("TOTAL_AMOUNT")));
+            params.add(Double.valueOf((String) data.get("TOTAL_AMOUNT")));
         } else if (data.get("NEW_AMOUNT") != null) {
-            params.add(Double.valueOf((String)data.get("NEW_AMOUNT")));
+            params.add(Double.valueOf((String) data.get("NEW_AMOUNT")));
         }
 
         this.baseDao.sqlExcute(sql, params);
@@ -133,12 +131,12 @@ public class HwStoreDataService {
         List<Object> params = new ArrayList();
         String sql = "update hh_hwstore.store_current set AMOUNT=?,UPDATE_TIME=? where ID=?";
         if (data.get("TOTAL_AMOUNT") != null) {
-            params.add(Double.valueOf((String)data.get("TOTAL_AMOUNT")));
+            params.add(Double.valueOf(data.get("TOTAL_AMOUNT")));
         } else if (data.get("NEW_AMOUNT") != null) {
-            params.add(Double.valueOf((String)data.get("NEW_AMOUNT")));
+            params.add(Double.valueOf( data.get("NEW_AMOUNT")));
         }
 
-        params.add(CommonsUtil.dateParse((String)data.get("DataTime"), "yyyyMMddHHmmss"));
+        params.add(CommonsUtil.dateParse(data.get("DataTime"), "yyyyMMddHHmmss"));
         params.add(id);
         this.baseDao.sqlExcute(sql, params);
     }
@@ -151,15 +149,15 @@ public class HwStoreDataService {
         params.add(data.get("WASTE_NAME"));
         params.add(data.get("WASTE_CODE"));
         params.add(data.get("BATCH_NO"));
-        params.add(Integer.valueOf((String)data.get("TYPE")));
-        params.add(Integer.valueOf((String)data.get("DETAIL_TYPE")));
-        params.add(Double.valueOf((String)data.get("AMOUNT")));
-        params.add(Double.valueOf((String)data.get("INPUT_AMOUNT")));
-        params.add(Double.valueOf((String)data.get("DIFF_AMOUNT")));
-        params.add(Double.valueOf((String)data.get("TOTAL_AMOUNT")));
-        params.add(Integer.valueOf((String)data.get("CONTAINER_COUNTS")));
+        params.add(Integer.valueOf(data.get("TYPE")));
+        params.add(Integer.valueOf(data.get("DETAIL_TYPE")));
+        params.add(Double.valueOf(data.get("AMOUNT")));
+        params.add(Double.valueOf(data.get("INPUT_AMOUNT")));
+        params.add(Double.valueOf(data.get("DIFF_AMOUNT")));
+        params.add(Double.valueOf(data.get("TOTAL_AMOUNT")));
+        params.add(Integer.valueOf(data.get("CONTAINER_COUNTS")));
         params.add(data.get("STORE_AREA"));
-        params.add(CommonsUtil.dateParse((String)data.get("DataTime"), "yyyyMMddHHmmss"));
+        params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
         params.add(data.get("OPERATOR"));
         params.add(data.get("CONTAINER_TYPE"));
         params.add(data.get("CONTAINER_SIZE"));
@@ -174,7 +172,7 @@ public class HwStoreDataService {
         new ArrayList();
         String waste_source_sql = "";
         ArrayList params_waste_source;
-        if (Integer.valueOf((String)data.get("TYPE")) == 1) {
+        if (Integer.valueOf(data.get("TYPE")) == 1) {
             waste_source_sql = " select distinct WASTE_SOURCE,WORKSHOP  from hh_hwstore.com_product_waste_view a  left join hh_hwstore.waste_view b on a.WASTE_ID=b.ID  left join hh_hwstore.com_storage_view c on c.COMPANY_ID=a.COMPANY_ID  left join hh_hwstore.storage_mn d on d.STORAGE_ID=c.ID  where d.MN=? and b.NAME=? and b.CODE=?  group by WASTE_SOURCE,WORKSHOP";
             params_waste_source = new ArrayList();
             params_waste_source.add(data.get("MN"));
@@ -189,13 +187,13 @@ public class HwStoreDataService {
 
         List<Map<String, Object>> waste_source_list = this.baseDao.sqlQuery(waste_source_sql, params_waste_source);
         if (waste_source_list != null && waste_source_list.size() > 0) {
-            for(int i = 0; i < waste_source_list.size(); ++i) {
-                String data_waste_source = (String)((Map)waste_source_list.get(i)).get("WASTE_SOURCE");
+            for (int i = 0; i < waste_source_list.size(); ++i) {
+                String data_waste_source = (String) ((Map) waste_source_list.get(i)).get("WASTE_SOURCE");
                 if (StringUtils.isNotEmpty(data_waste_source)) {
                     wasteSource = wasteSource + data_waste_source + "/";
                 }
 
-                String data_workshop = (String)((Map)waste_source_list.get(i)).get("WORKSHOP");
+                String data_workshop = (String) waste_source_list.get(i).get("WORKSHOP");
                 if (StringUtils.isNotEmpty(data_workshop)) {
                     workshop = workshop + data_workshop + "/";
                 }
@@ -224,11 +222,11 @@ public class HwStoreDataService {
         params.add(data.get("MN"));
         params.add(data.get("WASTE_NAME"));
         params.add(data.get("WASTE_CODE"));
-        params.add(Double.valueOf((String)data.get("OLD_AMOUNT")));
-        params.add(Double.valueOf((String)data.get("NEW_AMOUNT")));
-        params.add(Double.valueOf((String)data.get("DIFF_AMOUNT")));
-        params.add(Integer.valueOf((String)data.get("TYPE")));
-        params.add(CommonsUtil.dateParse((String)data.get("DataTime"), "yyyyMMddHHmmss"));
+        params.add(Double.valueOf( data.get("OLD_AMOUNT")));
+        params.add(Double.valueOf(data.get("NEW_AMOUNT")));
+        params.add(Double.valueOf(data.get("DIFF_AMOUNT")));
+        params.add(Integer.valueOf(data.get("TYPE")));
+        params.add(CommonsUtil.dateParse(data.get("DataTime"), "yyyyMMddHHmmss"));
         params.add(data.get("OPERATOR"));
         this.baseDao.sqlExcute(sql, params);
     }
@@ -239,10 +237,10 @@ public class HwStoreDataService {
         params.add(data.get("MN"));
         params.add(data.get("WASTE_CODE"));
         params.add(data.get("WASTE_NAME"));
-        params.add(((String)data.get("DataTime")).substring(0, 6));
+        params.add(((String) data.get("DataTime")).substring(0, 6));
         List<Map<String, Object>> list = this.baseDao.sqlQuery("select * from hh_hwstore.store_period where MN=? and WASTE_CODE=? and WASTE_NAME=? and MONTH=?", params);
         if (list != null && list.size() > 0) {
-            this.updatePeriodStore(data, (Map)list.get(0));
+            this.updatePeriodStore(data, (Map) list.get(0));
         } else {
             this.insertPeriodStore(data);
         }
@@ -253,7 +251,7 @@ public class HwStoreDataService {
         List<Object> params = new ArrayList();
         String sql = "insert into hh_hwstore.store_period(ID,MONTH,MN,WASTE_NAME,WASTE_CODE,IN_AMOUNT,OUT_AMOUNT,BEGIN_AMOUNT,END_AMOUNT,SELF_AMOUNT,TRANSFER_AMOUNT,DIFF_AMOUNT)values(?,?,?,?,?,?,?,?,?,?,?,?)";
         params.add(CommonsUtil.createUUID1());
-        params.add(((String)data.get("DataTime")).substring(0, 6));
+        params.add((data.get("DataTime")).substring(0, 6));
         params.add(data.get("MN"));
         params.add(data.get("WASTE_NAME"));
         params.add(data.get("WASTE_CODE"));
@@ -264,46 +262,46 @@ public class HwStoreDataService {
         Double SELF_AMOUNT = null;
         Double TRANSFER_AMOUNT = null;
         Double DIFF_AMOUNT = null;
-        String ST = (String)data.get("ST");
+        String ST = data.get("ST");
         if (ST.equals("SH")) {
             if (data.get("TYPE") != null && data.get("AMOUNT") != null) {
-                if (((String)data.get("TYPE")).equals("1")) {
-                    IN_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                if ((data.get("TYPE")).equals("1")) {
+                    IN_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                 } else {
-                    OUT_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                    OUT_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                 }
             }
 
             if (data.get("DETAIL_TYPE") != null && data.get("AMOUNT") != null) {
-                if (!((String)data.get("DETAIL_TYPE")).equals("4") && !((String)data.get("DETAIL_TYPE")).equals("5")) {
-                    if (((String)data.get("DETAIL_TYPE")).equals("6") || ((String)data.get("DETAIL_TYPE")).equals("7") || ((String)data.get("DETAIL_TYPE")).equals("8")) {
-                        TRANSFER_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                if (!(data.get("DETAIL_TYPE")).equals("4") && !(data.get("DETAIL_TYPE")).equals("5")) {
+                    if ((data.get("DETAIL_TYPE")).equals("6") || (data.get("DETAIL_TYPE")).equals("7") || (data.get("DETAIL_TYPE")).equals("8")) {
+                        TRANSFER_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                     }
                 } else {
-                    SELF_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                    SELF_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                 }
             }
 
             if (data.get("TOTAL_AMOUNT") != null) {
                 if (IN_AMOUNT != null) {
-                    BEGIN_AMOUNT = CommonsUtil.numberFormat(Double.valueOf((String)data.get("TOTAL_AMOUNT")) - IN_AMOUNT);
-                    END_AMOUNT = Double.valueOf((String)data.get("TOTAL_AMOUNT"));
+                    BEGIN_AMOUNT = CommonsUtil.numberFormat(Double.valueOf(data.get("TOTAL_AMOUNT")) - IN_AMOUNT);
+                    END_AMOUNT = Double.valueOf(data.get("TOTAL_AMOUNT"));
                 } else if (OUT_AMOUNT != null) {
-                    BEGIN_AMOUNT = CommonsUtil.numberFormat(Double.valueOf((String)data.get("TOTAL_AMOUNT")) + OUT_AMOUNT);
-                    END_AMOUNT = Double.valueOf((String)data.get("TOTAL_AMOUNT"));
+                    BEGIN_AMOUNT = CommonsUtil.numberFormat(Double.valueOf(data.get("TOTAL_AMOUNT")) + OUT_AMOUNT);
+                    END_AMOUNT = Double.valueOf(data.get("TOTAL_AMOUNT"));
                 }
             }
         } else if (ST.equals("SI")) {
             if (data.get("OLD_AMOUNT") != null) {
-                BEGIN_AMOUNT = Double.valueOf((String)data.get("OLD_AMOUNT"));
+                BEGIN_AMOUNT = Double.valueOf(data.get("OLD_AMOUNT"));
             }
 
             if (data.get("NEW_AMOUNT") != null) {
-                END_AMOUNT = Double.valueOf((String)data.get("NEW_AMOUNT"));
+                END_AMOUNT = Double.valueOf(data.get("NEW_AMOUNT"));
             }
 
             if (data.get("DIFF_AMOUNT") != null) {
-                DIFF_AMOUNT = Double.valueOf((String)data.get("DIFF_AMOUNT"));
+                DIFF_AMOUNT = Double.valueOf(data.get("DIFF_AMOUNT"));
             }
         }
 
@@ -326,50 +324,50 @@ public class HwStoreDataService {
         Double SELF_AMOUNT = null;
         Double TRANSFER_AMOUNT = null;
         Double DIFF_AMOUNT = null;
-        String ST = (String)data.get("ST");
+        String ST = data.get("ST");
         if (ST.equals("SH")) {
             if (data.get("TYPE") != null && data.get("AMOUNT") != null) {
-                if (((String)data.get("TYPE")).equals("1")) {
-                    IN_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                if ((data.get("TYPE")).equals("1")) {
+                    IN_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                     if (existData.get("IN_AMOUNT") != null) {
-                        IN_AMOUNT = CommonsUtil.numberFormat((Double)existData.get("IN_AMOUNT") + IN_AMOUNT);
+                        IN_AMOUNT = CommonsUtil.numberFormat((Double) existData.get("IN_AMOUNT") + IN_AMOUNT);
                     }
                 } else {
-                    OUT_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                    OUT_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                     if (existData.get("OUT_AMOUNT") != null) {
-                        OUT_AMOUNT = CommonsUtil.numberFormat((Double)existData.get("OUT_AMOUNT") + OUT_AMOUNT);
+                        OUT_AMOUNT = CommonsUtil.numberFormat((Double) existData.get("OUT_AMOUNT") + OUT_AMOUNT);
                     }
                 }
             }
 
             if (data.get("DETAIL_TYPE") != null && data.get("AMOUNT") != null) {
-                if (!((String)data.get("DETAIL_TYPE")).equals("4") && !((String)data.get("DETAIL_TYPE")).equals("5")) {
-                    if (((String)data.get("DETAIL_TYPE")).equals("6") || ((String)data.get("DETAIL_TYPE")).equals("7") || ((String)data.get("DETAIL_TYPE")).equals("8")) {
-                        TRANSFER_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                if (!(data.get("DETAIL_TYPE")).equals("4") && !(data.get("DETAIL_TYPE")).equals("5")) {
+                    if ((data.get("DETAIL_TYPE")).equals("6") || (data.get("DETAIL_TYPE")).equals("7") || (data.get("DETAIL_TYPE")).equals("8")) {
+                        TRANSFER_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                         if (existData.get("TRANSFER_AMOUNT") != null) {
-                            TRANSFER_AMOUNT = CommonsUtil.numberFormat((Double)existData.get("TRANSFER_AMOUNT") + TRANSFER_AMOUNT);
+                            TRANSFER_AMOUNT = CommonsUtil.numberFormat((Double) existData.get("TRANSFER_AMOUNT") + TRANSFER_AMOUNT);
                         }
                     }
                 } else {
-                    SELF_AMOUNT = Double.valueOf((String)data.get("AMOUNT"));
+                    SELF_AMOUNT = Double.valueOf(data.get("AMOUNT"));
                     if (existData.get("SELF_AMOUNT") != null) {
-                        SELF_AMOUNT = CommonsUtil.numberFormat((Double)existData.get("SELF_AMOUNT") + SELF_AMOUNT);
+                        SELF_AMOUNT = CommonsUtil.numberFormat((Double) existData.get("SELF_AMOUNT") + SELF_AMOUNT);
                     }
                 }
             }
 
             if (data.get("TOTAL_AMOUNT") != null) {
-                END_AMOUNT = Double.valueOf((String)data.get("TOTAL_AMOUNT"));
+                END_AMOUNT = Double.valueOf(data.get("TOTAL_AMOUNT"));
             }
         } else if (ST.equals("SI")) {
             if (data.get("NEW_AMOUNT") != null) {
-                END_AMOUNT = Double.valueOf((String)data.get("NEW_AMOUNT"));
+                END_AMOUNT = Double.valueOf(data.get("NEW_AMOUNT"));
             }
 
             if (data.get("DIFF_AMOUNT") != null) {
-                DIFF_AMOUNT = Double.valueOf((String)data.get("DIFF_AMOUNT"));
+                DIFF_AMOUNT = Double.valueOf(data.get("DIFF_AMOUNT"));
                 if (existData.get("DIFF_AMOUNT") != null) {
-                    DIFF_AMOUNT = CommonsUtil.numberFormat((Double)existData.get("DIFF_AMOUNT") + DIFF_AMOUNT);
+                    DIFF_AMOUNT = CommonsUtil.numberFormat((Double) existData.get("DIFF_AMOUNT") + DIFF_AMOUNT);
                 }
             }
         }
@@ -418,7 +416,7 @@ public class HwStoreDataService {
         List<Object> params = new ArrayList();
         params.add(data.get("MN"));
         params.add(data.get("BATCH_NO"));
-        params.add(Integer.valueOf((String)data.get("TYPE")));
+        params.add(Integer.valueOf((String) data.get("TYPE")));
         List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
         return list != null && !list.isEmpty();
     }
@@ -427,7 +425,7 @@ public class HwStoreDataService {
         String sql = "select * from hh_hwstore.store_history where MN=? and DATA_TIME>=?";
         List<Object> params = new ArrayList();
         params.add(data.get("MN"));
-        params.add(CommonsUtil.dateParse((String)data.get("DataTime"), "yyyyMMddHHmmss"));
+        params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
         List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
         return list == null || list.isEmpty();
     }
@@ -436,7 +434,7 @@ public class HwStoreDataService {
         String sql = "select * from hh_hwstore.store_inventory where MN=? and DATA_TIME=?";
         List<Object> params = new ArrayList();
         params.add(data.get("MN"));
-        params.add(CommonsUtil.dateParse((String)data.get("DataTime"), "yyyyMMddHHmmss"));
+        params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
         List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
         return list != null && !list.isEmpty();
     }
@@ -445,7 +443,7 @@ public class HwStoreDataService {
         String sql = "select * from hh_hwstore.store_history where MN=? and DATA_TIME>=?";
         List<Object> params = new ArrayList();
         params.add(data.get("MN"));
-        params.add(CommonsUtil.dateParse((String)data.get("DataTime"), "yyyyMMddHHmmss"));
+        params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
         List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
         return list == null || list.isEmpty();
     }

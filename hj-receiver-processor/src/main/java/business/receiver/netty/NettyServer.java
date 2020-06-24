@@ -1,10 +1,14 @@
 package business.receiver.netty;
 
 import business.config.MybatisPlusConfig;
+import business.processor.task.UpdateTableFieldTask;
 import business.receiver.entity.SysDeviceMessage;
 import business.receiver.entity.SysDeviceMessageEnum;
 import business.receiver.mapper.CommonMapper;
 import business.receiver.mapper.SysDeviceMessageMapper;
+import business.receiver.service.GpsDataService;
+import business.receiver.service.HwStoreDataService;
+import business.receiver.service.OnlineDataService;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.netty.bootstrap.ServerBootstrap;
@@ -48,6 +52,14 @@ public class NettyServer {
     private boolean receiveGps = true;
     @Value("${receive.hwstore}")
     private boolean receiveHwstore = true;
+
+    @Autowired
+    private OnlineDataService onlineDataService;
+    @Autowired
+    private GpsDataService gpsDataService;
+    @Autowired
+    private HwStoreDataService hwStoreDataService;
+
     //记录服务端已有的连接
     public static Map<String, ChannelHandlerContext> map = new HashMap<>();
 
@@ -67,7 +79,14 @@ public class NettyServer {
     @PostConstruct
     public void initial() {
         Thread server = new Thread(() -> {
-            //TODO 这边可能需要用到线程去分配报文
+            //月初时如果更新表还没有结束，则一直等待初始化结束
+            while(!UpdateTableFieldTask.isInitial()) {
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException var11) {
+                    var11.printStackTrace();
+                }
+            }
             SocketAddress address = new InetSocketAddress(socketAddress, socketPort);
             //new 一个主线程组
             EventLoopGroup bossGroup = new NioEventLoopGroup(1);
