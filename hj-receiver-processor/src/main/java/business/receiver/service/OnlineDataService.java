@@ -1,6 +1,7 @@
 package business.receiver.service;
 
 import business.processor.bean.DataPacketBean;
+import business.processor.excute.DataParserAuto;
 import business.receiver.threadPool.ThreadPoolService;
 import business.redis.RedisService;
 import business.sms.SmsService;
