@@ -159,3 +159,12 @@ hj:
   server:
     address: 127.0.0.1 #数据接收程序的ip
     port: 6000 #数据接收程序的端口号
+receive:
+  online: true
+  gps : true
+  hwstore : true
+thread:
+  pool:
+    process:
+      hand: 100
+    reverse: 20

@@ -1,5 +1,12 @@
 package business.receiver.netty;
 
+import business.config.MybatisPlusConfig;
+import business.receiver.entity.SysDeviceMessage;
+import business.receiver.entity.SysDeviceMessageEnum;
+import business.receiver.mapper.CommonMapper;
+import business.receiver.mapper.SysDeviceMessageMapper;
+import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -12,6 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,24 +31,34 @@ import java.util.Map;
 @Slf4j
 @Component
 public class NettyServer {
-
     /**
      * 接收程序socket端口
      **/
     @Value("${hj.server.address}")
     public String socketAddress;
-
     /**
      * 接收程序socket端口
      **/
     @Value("${hj.server.port}")
     public int socketPort;
 
+    @Value("${receive.online}")
+    private boolean receiveOnline = true;
+    @Value("${receive.gps}")
+    private boolean receiveGps = true;
+    @Value("${receive.hwstore}")
+    private boolean receiveHwstore = true;
     //记录服务端已有的连接
     public static Map<String, ChannelHandlerContext> map = new HashMap<>();
 
     @Autowired
     ServerChannelInitializer serverChannelInitializer;
+
+    @Autowired(required=false)
+    private SysDeviceMessageMapper sysDeviceMessageMapper;
+
+    @Autowired(required=false)
+    private CommonMapper commonMapper;
 
     /**
      * PostConstruct注解用于方法上，该方法在初始化的依赖注入操作之后被执行。
@@ -80,4 +98,59 @@ public class NettyServer {
         server.start();
     }
 
+    public void read(String msg, ChannelHandlerContext ctx) {
+
+        if (msg != null) {
+            int index = msg.indexOf("MN=");
+            if(index==-1){
+                log.error("数据报文格式错误[MN错误]：" + msg);
+            }else{
+                String mn = msg.substring(index + 3, msg.indexOf(59, index));
+                if (mn.equals("")) {
+                    log.error("数据报文格式错误[MN错误]：" + msg);
+                }else{
+                    //插入数据到数据库
+                    String thisMonth = DateUtil.format(new Date(),"yyMM");
+                    String tableName = "sys_device_message_" + thisMonth;
+                    if(commonMapper.checkTableExistsWithSchema(tableName)==0){
+                        sysDeviceMessageMapper.createSysDeviceMessageTable(tableName);
+                    }
+                    SysDeviceMessage deviceMessage = new SysDeviceMessage();
+                    deviceMessage.setContent(msg);
+                    deviceMessage.setFlag(SysDeviceMessageEnum.IS_RECIEVE.code());
+                    deviceMessage.setMn(mn);
+                    //动态表名设置
+                    MybatisPlusConfig.tableName.set("sys_device_message_"+DateUtil.format(new Date(),"yyMM"));
+                    int result = sysDeviceMessageMapper.insert(deviceMessage);
+                    if(result==0){
+                        log.error("报文插入数据库失败！");
+                    }
+                }
+            }
+        }
+        try {
+            if (StringUtils.isNotEmpty(msg)) {
+                if (msg.startsWith("$")) {
+                    if (this.receiveGps) {
+                        this.gpsDataService.accept(msg);
+                    } else {
+                        log.error("GPS数据接收器未开启[receive.gps]，报文丢弃：" + msg);
+                    }
+                } else if (msg.startsWith("#HWSTORE#")) {
+                    if (this.receiveHwstore) {
+                        this.hwStoreDataService.accept(msg, ctx);
+                    } else {
+                        log.error("危废数据接收器未开启[receive.hwstore]，报文丢弃：" + msg);
+                    }
+                } else if (this.receiveOnline) {
+                    this.onlineDataService.accept(msg, ctx);
+                } else {
+                    log.error("在线监测数据接收器未开启[receive.online]，报文丢弃：" + msg);
+                }
+            }
+        } catch (Exception var4) {
+            log.error("报文接收错误[" + var4.getMessage() + "],报文：" + msg, var4);
+        }
+
+    }
 }

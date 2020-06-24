@@ -19,57 +19,41 @@ import java.util.Map;
 
 /**
  * 单数据源配置（jeecg.datasource.open = false时生效）
- * @Author zhoujf
  *
+ * @Author zhoujf
  */
 @Configuration
-@MapperScan(value={"business.receiver.mapper"})
+@MapperScan(value = {"business.receiver.mapper"})
 public class MybatisPlusConfig {
 
 
     /**
      * user动态表存放对象
      */
-    public static ThreadLocal<String> tableName =new ThreadLocal<>();
+    public static ThreadLocal<String> tableName = new ThreadLocal<>();
 
     @Bean
-    PaginationInterceptor paginationInterceptor(){
+    PaginationInterceptor paginationInterceptor() {
         PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
         ArrayList<ISqlParser> sqlParsersList = new ArrayList<>();
-
         //动态表名解析器(报文接收表)
         Map<String, ITableNameHandler> tableNameHandlerMap = new HashMap<>();
-        tableNameHandlerMap.put("sys_device_message", new ITableNameHandler() {
-            @Override
-            public String dynamicTableName(MetaObject metaObject, String sql, String tableName) {
-                return MybatisPlusConfig.tableName.get();
-            }
-        });
-        tableNameHandlerMap.put("water_current", new ITableNameHandler() {
-            @Override
-            public String dynamicTableName(MetaObject metaObject, String sql, String tableName) {
-                return MybatisPlusConfig.tableName.get();
-            }
-        });
-
+        tableNameHandlerMap.put("sys_device_message", (metaObject, sql, tableName) -> MybatisPlusConfig.tableName.get());
+        tableNameHandlerMap.put("water_current", (metaObject, sql, tableName) -> MybatisPlusConfig.tableName.get());
         DynamicTableNameParser dynamicTableNameParser = new DynamicTableNameParser();
         dynamicTableNameParser.setTableNameHandlerMap(tableNameHandlerMap);
         sqlParsersList.add(dynamicTableNameParser);
-
         paginationInterceptor.setSqlParserList(sqlParsersList);
 
         /**
          * 过滤掉（即不引入）哪些方法的sql解析功能（即不进行动态表名替换）
          */
-        paginationInterceptor.setSqlParserFilter(new ISqlParserFilter() {
-            @Override
-            public boolean doFilter(MetaObject metaObject) {
-                MappedStatement ms = SqlParserHelper.getMappedStatement(metaObject);
-                if("com.dsf.mp.dynamicTableNameParser.dao.UserMapper.selectById".equals(ms.getId())){
-                    return true;
-                }
-                return false;
+        paginationInterceptor.setSqlParserFilter((metaObject) -> {
+            MappedStatement ms = SqlParserHelper.getMappedStatement(metaObject);
+            if ("com.dsf.mp.dynamicTableNameParser.dao.UserMapper.selectById".equals(ms.getId())) {
+                return true;
             }
+            return false;
         });
 
         return paginationInterceptor;
