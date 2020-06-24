@@ -1,11 +1,12 @@
 package business.receiver.threadPool;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+@Data
 public class ThreadPoolService {
     private int reverseThreads = 20;
     private int receiveThreads = 80;
@@ -54,5 +55,25 @@ public class ThreadPoolService {
         }
 
         THREAD_POOL_PROCESS_AUTO = Executors.newFixedThreadPool(this.autoProcessThreads);
+    }
+
+    public void setHandProcessPool() {
+        THREAD_POOL_PROCESS_HAND = Executors.newFixedThreadPool(this.handProcessThreads);
+    }
+
+    public ExecutorService getReversePool() {
+        return THREAD_POOL_REVERSE;
+    }
+
+    public ExecutorService getReceivePool() {
+        return THREAD_POOL_RECEIVE;
+    }
+
+    public ExecutorService getAutoProcessPool() {
+        return THREAD_POOL_PROCESS_AUTO;
+    }
+
+    public ExecutorService getHandProcessPool() {
+        return THREAD_POOL_PROCESS_HAND;
     }
 }

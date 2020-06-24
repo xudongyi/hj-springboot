@@ -16,6 +16,12 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.36.Final</version>
         </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
         <!--用来解析212报文-->
         <dependency>
             <groupId>com.github.xiaoyao9184</groupId>
