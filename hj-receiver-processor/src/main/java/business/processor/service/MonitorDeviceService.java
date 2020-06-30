@@ -23,11 +23,9 @@ public class MonitorDeviceService {
     private RedisService redisService;
     @Autowired
     private WarnService warnService;
-
     @Autowired
     private MyBaseMapper myBaseMapper;
-    @Autowired
-    private MonitorMapper monitorMapper;
+
     public MonitorDeviceService() {
     }
 
@@ -38,7 +36,7 @@ public class MonitorDeviceService {
             if (StringUtils.isNotEmpty(result)) {
                 List<MonitorDeviceBean> list = (List) CommonsUtil.toJsonObject(result, MonitorDeviceBean.class);
                 if (list != null) {
-                    for(int i = 0; i < list.size(); ++i) {
+                    for (int i = 0; i < list.size(); ++i) {
                         if (factorCode != null && factorCode.equals((list.get(i)).getFactorCode().toUpperCase())) {
                             device = list.get(i);
                             break;
@@ -58,7 +56,7 @@ public class MonitorDeviceService {
         if (StringUtils.isNotEmpty(mn) && StringUtils.isNotEmpty(factorCode)) {
             String result = this.redisService.getMapValue("device_current_data_map", mn + "-" + factorCode);
             if (StringUtils.isNotEmpty(result)) {
-                v = (DataFactorBean)CommonsUtil.toJsonObject(result, DataFactorBean.class);
+                v = (DataFactorBean) CommonsUtil.toJsonObject(result, DataFactorBean.class);
             } else {
                 this.log.debug("Redis提示[获取监控点" + mn + "最新实时数据" + factorCode + "]:未取到值");
             }
@@ -79,7 +77,7 @@ public class MonitorDeviceService {
         if (StringUtils.isNotEmpty(mn) && StringUtils.isNotEmpty(factorCode)) {
             String result = this.redisService.getMapValue("device_data_map", mn + "-" + factorCode + "-" + cn);
             if (StringUtils.isNotEmpty(result)) {
-                v = (DataFactorBean)CommonsUtil.toJsonObject(result, DataFactorBean.class);
+                v = (DataFactorBean) CommonsUtil.toJsonObject(result, DataFactorBean.class);
             } else {
                 this.log.debug("Redis提示[获取监控点" + mn + "最新" + cn + "数据" + factorCode + "]:未取到值");
             }
@@ -100,20 +98,20 @@ public class MonitorDeviceService {
             this.redisService.setMapValue("device_status_map", mn + "-" + factorCode, deviceStatus);
             String monitorRedis = this.redisService.getMapValue("mn_monitor_map", mn);
             if (StringUtils.isNotEmpty(monitorRedis)) {
-                MonitorBean monitor = (MonitorBean)CommonsUtil.toJsonObject(monitorRedis, MonitorBean.class);
+                MonitorBean monitor = (MonitorBean) CommonsUtil.toJsonObject(monitorRedis, MonitorBean.class);
                 String monitorId = monitor.getMonitorId();
                 String result = this.redisService.getMapValue("monitor_device_map", monitorId);
                 if (StringUtils.isNotEmpty(result)) {
-                    List<MonitorDeviceBean> list = (List)CommonsUtil.toJsonObject(result, MonitorDeviceBean.class);
+                    List<MonitorDeviceBean> list = (List) CommonsUtil.toJsonObject(result, MonitorDeviceBean.class);
                     if (list != null && list.size() > 0) {
-                        for(int i = 0; i < list.size(); ++i) {
-                            MonitorDeviceBean device = (MonitorDeviceBean)list.get(i);
+                        for (int i = 0; i < list.size(); ++i) {
+                            MonitorDeviceBean device = (MonitorDeviceBean) list.get(i);
                             if (factorCode != null && factorCode.equals(device.getFactorCode().toUpperCase())) {
                                 device.setDeviceStatus(Integer.valueOf(deviceStatus));
                                 List<Object> params = new ArrayList();
                                 params.add(Integer.valueOf(deviceStatus));
                                 params.add(device.getDeviceId());
-                                this.myBaseMapper.sqlExcute(SqlBuilder.buildSql("update mon_device set device_status={0} where device_id={1}",params));
+                                this.myBaseMapper.sqlExcute(SqlBuilder.buildSql("update mon_device set device_status={0} where device_id={1}", params));
                                 break;
                             }
                         }
@@ -134,10 +132,10 @@ public class MonitorDeviceService {
         Map<String, String> map = new HashMap();
         String result = this.redisService.getMapValue("dic", "deviceStatus");
         if (StringUtils.isNotEmpty(result)) {
-            List<DicBean> list = (List)CommonsUtil.toJsonObject(result, DicBean.class);
+            List<DicBean> list = (List) CommonsUtil.toJsonObject(result, DicBean.class);
 
-            for(int i = 0; i < list.size(); ++i) {
-                map.put(((DicBean)list.get(i)).getValue(), ((DicBean)list.get(i)).getText());
+            for (int i = 0; i < list.size(); ++i) {
+                map.put(((DicBean) list.get(i)).getValue(), ((DicBean) list.get(i)).getText());
             }
         } else {
             this.log.debug("Redis提示[获取数据字典设备状态deviceStatus]:未取到值");
@@ -158,18 +156,18 @@ public class MonitorDeviceService {
         List<Object> params = new ArrayList();
         params.add(mn);
         params.add(factorCode);
-        List<Map<String, Object>> lastDeviceStateData =  this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(sql,params));
+        List<Map<String, Object>> lastDeviceStateData = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(sql, params));
         boolean isAdd = false;
         Map warnRule;
         if (lastDeviceStateData != null && lastDeviceStateData.size() > 0) {
-            warnRule = (Map)lastDeviceStateData.get(0);
+            warnRule = lastDeviceStateData.get(0);
             params = new ArrayList();
             params.add(now);
             params.add(dataTime);
             params.add(warnRule.get("ID"));
             sql = "UPDATE DEVICE_STATE SET END_TIME=''{0}'',DATA_TIME=''{1}'' WHERE ID={2}";
-            this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql,params));
-            int lastState = (Integer)warnRule.get("STATE");
+            this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
+            int lastState = (Integer) warnRule.get("STATE");
             if (lastState != Integer.valueOf(thisState)) {
                 isAdd = true;
             }
@@ -187,12 +185,12 @@ public class MonitorDeviceService {
             params.add(now);
             params.add(bean.getSampleTime());
             params.add(Integer.valueOf(thisState));
-            sql = "INSERT INTO DEVICE_STATE(ID,MN,CODE,DATA_TIME,CREATE_TIME,END_TIME,SAMPLE_TIME,STATE) VALUES(?,?,?,?,?,?,?,?)";
-            this.baseDao.sqlExcute(sql, params);
+            sql = "INSERT INTO DEVICE_STATE(ID,MN,CODE,DATA_TIME,CREATE_TIME,END_TIME,SAMPLE_TIME,STATE) VALUES({0},''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'')";
+            this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql,params));
         }
 
         if (!thisState.equals("0")) {
-            WarnRuleBean warnRuleBean ;
+            WarnRuleBean warnRuleBean;
             if (monitorType != 3 && monitorType != 5 && monitorType != 7) {
                 warnRuleBean = this.warnService.getDeviceWarnRule(mn, factorCode);
             } else {
