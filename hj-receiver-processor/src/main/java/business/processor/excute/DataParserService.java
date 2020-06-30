@@ -9,6 +9,7 @@ import java.util.Map;
 import business.processor.bean.DataFactorBean;
 import business.processor.bean.DataPacketBean;
 import business.processor.bean.FactorBean;
+import business.processor.excute.airq.AirQDataExcuter;
 import business.util.CommonsUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -19,35 +20,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DataParserService {
     @Autowired
-    private FactorService factorService;
-    @Autowired
-    private UpdateTableFieldTask updateTableFieldTask;
-    @Autowired
-    private IBaseDao baseDao;
-    @Autowired
-    private WaterCurrentExcuter waterCurrentExcuter;
-    @Autowired
-    private WaterDataExcuter waterDataExcuter;
-    @Autowired
-    private TianzeSurplusExcuter tianzeSurplusExcuter;
-    @Autowired
-    private AirCurrentExcuter airCurrentExcuter;
-    @Autowired
-    private AirDataExcuter airDataExcuter;
-    @Autowired
-    private AirIncineratorExcuter airIncineratorExcuter;
-    @Autowired
     private AirQDataExcuter airQDataExcuter;
-    @Autowired
-    private NoiseDataExcuter noiseDataExcuter;
-    @Autowired
-    private SurfWaterDataExcuter surfWaterDataExcuter;
-    @Autowired
-    private VocCurrentExcuter vocCurrentExcuter;
-    @Autowired
-    private VocDataExcuter vocDataExcuter;
-    @Autowired
-    private BakSourceService bakSourceService;
 
     public DataParserService() {
     }
@@ -259,43 +232,9 @@ public class DataParserService {
             try {
                 if (!cn.equals("3015") && !cn.equals("8804") && !cn.equals("8803") && !cn.equals("3715")) {
                     tag = 6;
-                    if (st.equals("32")) {
-                        if (cn.equals("2011")) {
-                            tag = this.waterCurrentExcuter.execute(dataPacketBean);
-                        } else if (!cn.equals("2051") && !cn.equals("2061") && !cn.equals("2031")) {
-                            if (cn.equals("4013")) {
-                                tag = this.tianzeSurplusExcuter.execute(dataPacketBean);
-                            }
-                        } else {
-                            tag = this.waterDataExcuter.execute(dataPacketBean);
-                        }
-                    } else if (st.equals("31")) {
-                        if (cn.equals("2011")) {
-                            tag = this.airCurrentExcuter.execute(dataPacketBean);
-                        } else if (!cn.equals("2051") && !cn.equals("2061") && !cn.equals("2031")) {
-                            if (cn.equals("3020")) {
-                                tag = this.airIncineratorExcuter.execute(dataPacketBean);
-                            }
-                        } else {
-                            tag = this.airDataExcuter.execute(dataPacketBean);
-                        }
-                    } else if (st.equals("22")) {
+                    if (st.equals("22")) {
                         if (cn.equals("2061") || cn.equals("2031")) {
                             tag = this.airQDataExcuter.execute(dataPacketBean);
-                        }
-                    } else if (st.equals("21")) {
-                        if (cn.equals("2061") || cn.equals("2031")) {
-                            tag = this.surfWaterDataExcuter.execute(dataPacketBean);
-                        }
-                    } else if (st.equals("23")) {
-                        if (cn.equals("2011") || cn.equals("2051") || cn.equals("2061") || cn.equals("2031")) {
-                            tag = this.noiseDataExcuter.execute(dataPacketBean);
-                        }
-                    } else if (st.equals("27")) {
-                        if (cn.equals("2011")) {
-                            tag = this.vocCurrentExcuter.execute(dataPacketBean);
-                        } else if (cn.equals("2051") || cn.equals("2061") || cn.equals("2031")) {
-                            tag = this.vocDataExcuter.execute(dataPacketBean);
                         }
                     }
                 } else {

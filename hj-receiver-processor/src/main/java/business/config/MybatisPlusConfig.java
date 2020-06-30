@@ -23,7 +23,7 @@ import java.util.Map;
  * @Author zhoujf
  */
 @Configuration
-@MapperScan(value = {"business.receiver.mapper"})
+@MapperScan(value = {"business.receiver.mapper","business.processor.mapper"})
 public class MybatisPlusConfig {
 
 
