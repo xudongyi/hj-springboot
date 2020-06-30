@@ -5,5 +5,7 @@
     <select id="getAllMonitor" resultType="java.util.HashMap">
        select * from site_monitor_point where state=0
     </select>
-
+    <select id="getAirQMonitor" resultType="java.util.HashMap">
+       select * from site_monitor_point where state=0 and type=3
+    </select>
 </mapper>

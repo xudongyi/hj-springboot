@@ -13,4 +13,6 @@ public interface MonitorMapper {
     void updateMonitorStatus(String column,String mn,int status);
 
     List<Map<String,Object>> getAllMonitor();
+
+    List<Map<String,Object>> getAirQMonitor();
 }

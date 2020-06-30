@@ -42,7 +42,6 @@ public class AnalogDataSendService {
 
     @PostConstruct
     public void initSend() {
-        log.info("初始化模拟程序");
         AnalogData data = new AnalogData();
         if (useDb) {
             List<Map<String, Object>> monitors = monitorMapper.getAllMonitor();

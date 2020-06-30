@@ -1,5 +1,6 @@
 package business.processor.task;
 
+import business.processor.mapper.MonitorMapper;
 import business.receiver.mapper.MyBaseMapper;
 import business.util.CommonsUtil;
 import business.util.MathCalcUtil;
@@ -16,65 +17,74 @@ import java.util.*;
 public class AirQMonthTask {
     @Autowired
     private UpdateTableFieldTask updateTableFieldTask;
+
+    @Autowired(required = true)
+    private MonitorMapper monitorMapper;
+
     @Autowired
     private MyBaseMapper myBaseMapper;
+
     public AirQMonthTask() {
     }
 
     @Scheduled(cron = "0 0 1 1 * ?")
     @Async
     public void run() {
-        int month = DateUtil.month(new Date())+1;
-        this.saveData(1,"airq_month","month");
-        if(month==1){
-            this.saveData(12,"airq_year","year");
+        int month = DateUtil.month(new Date()) + 1;
+        this.saveData(1, "airq_month", "month");
+        if (month == 1) {
+            this.saveData(12, "airq_year", "year");
         }
-        if((month-1)%3==0){
-            this.saveData(1,"airq_quarter","quarter");
+        if ((month - 1) % 3 == 0) {
+            this.saveData(3, "airq_quarter", "quarter");
         }
+
     }
 
-    private void saveData(int month,String tableName,String column) {
+    private void saveData(int month, String tableName, String column) {
         int factorType = 3;
         Date end = CommonsUtil.dateParse(CommonsUtil.dateCurrent("yyyy-MM-dd"), "yyyy-MM-dd");
-        Date begin = CommonsUtil.dateParse(CommonsUtil.month(0-month), "yyyy-MM-dd");
+        Date begin = CommonsUtil.dateParse(CommonsUtil.month(0 - month), "yyyy-MM-dd");
+        String endStr = DateUtil.format(end, "yyyy-MM-dd 00:00:00");
+        String beginStr = DateUtil.format(begin, "yyyy-MM-dd 00:00:00");
+
         String lastDate = CommonsUtil.dateFormat(begin, "yyyyMM");
-        if(column.equals("year")){
+        if (column.equals("year")) {
             lastDate = CommonsUtil.dateFormat(begin, "yyyy");
         }
-        if(column.equals("year")){
-            lastDate = CommonsUtil.dateFormat(begin, "yyyyMM")+"~"+ CommonsUtil.dateFormat(end, "yyyyMM");
+        if (column.equals("quarter")) {
+            lastDate = CommonsUtil.dateFormat(begin, "yyyyMM") + "~" + CommonsUtil.dateFormat(end, "yyyyMM");
         }
 
         String day_sql = "select MN,LEVEL ";
-        if (this.updateTableFieldTask.isFieldExist("A0502408-" + factorType, factorType)) {
+        if (this.updateTableFieldTask.isFieldExist("A0502408" , factorType)) {
             day_sql = day_sql + ",A0502408_AVG";
         }
 
-        if (this.updateTableFieldTask.isFieldExist("A21005-" + factorType, factorType)) {
+        if (this.updateTableFieldTask.isFieldExist("A21005" , factorType)) {
             day_sql = day_sql + ",A21005_AVG";
         }
 
-        if (this.updateTableFieldTask.isFieldExist("A21026-" + factorType, factorType)) {
+        if (this.updateTableFieldTask.isFieldExist("A21026", factorType)) {
             day_sql = day_sql + ",A21026_AVG";
         }
 
-        if (this.updateTableFieldTask.isFieldExist("A21004-" + factorType, factorType)) {
+        if (this.updateTableFieldTask.isFieldExist("A21004" , factorType)) {
             day_sql = day_sql + ",A21004_AVG";
         }
 
-        if (this.updateTableFieldTask.isFieldExist("A3400224-" + factorType, factorType)) {
+        if (this.updateTableFieldTask.isFieldExist("A3400224" , factorType)) {
             day_sql = day_sql + ",A3400224_AVG";
         }
 
-        if (this.updateTableFieldTask.isFieldExist("A3400424-" + factorType, factorType)) {
+        if (this.updateTableFieldTask.isFieldExist("A3400424" , factorType)) {
             day_sql = day_sql + ",A3400424_AVG";
         }
 
-        day_sql = day_sql + " from bak_airq_day where data_time >='"+begin+"' and data_time<'"+end+"'";
-        String month_sql = "select * from "+tableName+"  where "+column+"='"+ lastDate +"'";
-        String insert_month_sql = "insert into "+tableName+"(ID,"+column+",CREATE_TIME,MN,FINE_DAYS,TOTAL_I,A21026_AVG,A21004_AVG,A34002_AVG,A34004_AVG,A21005_95,A05024_90,A21026_S,A21004_S,A34002_S,A34004_S,A21005_S,A05024_S,A21026_I,A21004_I,A34002_I,A34004_I,A21005_I,A05024_I)values(''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'',''{0}'')";
-        List<Object> params =new ArrayList<>();
+        day_sql = day_sql + " from airq_day where data_time >='" + beginStr + "' and data_time<'" + endStr + "'";
+        String month_sql = "select * from " + tableName + "  where " + column + "='" + lastDate + "'";
+        String insert_month_sql = "insert into " + tableName + "(ID," + column + ",CREATE_TIME,MN,FINE_DAYS,TOTAL_I,A21026_AVG,A21004_AVG,A34002_AVG,A34004_AVG,A21005_95,A05024_90,A21026_S,A21004_S,A34002_S,A34004_S,A21005_S,A05024_S,A21026_I,A21004_I,A34002_I,A34004_I,A21005_I,A05024_I)values(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'',''{8}'',''{9}'',''{10}'',''{11}'',''{12}'',''{13}'',''{14}'',''{15}'',''{16}'',''{17}'',''{18}'',''{19}'',''{20}'',''{21}'',''{22}'',''{23}'')";
+        List<Object> params = new ArrayList<>();
         List<Map<String, Object>> month_data = this.myBaseMapper.sqlQuery(month_sql);
         if (month_data == null || month_data.size() == 0) {
             List<Map<String, Object>> day_data = this.myBaseMapper.sqlQuery(day_sql);
@@ -92,17 +102,17 @@ public class AirQMonthTask {
                 double no2;
                 double pm10;
                 double pm2_5;
-                for(int i = 0; i < day_data.size(); ++i) {
-                    Map<String, Object> data = (Map)day_data.get(i);
-                    String mn = (String)data.get("MN");
-                    String level = (String)data.get("LEVEL");
+                for (int i = 0; i < day_data.size(); ++i) {
+                    Map<String, Object> data = (Map) day_data.get(i);
+                    String mn = (String) data.get("MN");
+                    String level = (String) data.get("LEVEL");
                     o3_c = 0.0D;
                     if (data.get("A0502408_AVG") != null) {
-                        o3_c = (Double)data.get("A0502408_AVG");
+                        o3_c = (Double) data.get("A0502408_AVG");
                     }
 
                     if (o3_data.containsKey(mn)) {
-                        ((List)o3_data.get(mn)).add(o3_c);
+                        ((List) o3_data.get(mn)).add(o3_c);
                     } else {
                         List<Double> o3_add = new ArrayList();
                         o3_add.add(o3_c);
@@ -111,11 +121,11 @@ public class AirQMonthTask {
 
                     co = 0.0D;
                     if (data.get("A21005_AVG") != null) {
-                        co = (Double)data.get("A21005_AVG");
+                        co = (Double) data.get("A21005_AVG");
                     }
 
                     if (co_data.containsKey(mn)) {
-                        ((List)co_data.get(mn)).add(co);
+                        ((List) co_data.get(mn)).add(co);
                     } else {
                         List<Double> co_add = new ArrayList();
                         co_add.add(co);
@@ -124,11 +134,11 @@ public class AirQMonthTask {
 
                     so2 = 0.0D;
                     if (data.get("A21026_AVG") != null) {
-                        so2 = (Double)data.get("A21026_AVG");
+                        so2 = (Double) data.get("A21026_AVG");
                     }
 
                     if (so2_data.containsKey(mn)) {
-                        ((List)so2_data.get(mn)).add(so2);
+                        ((List) so2_data.get(mn)).add(so2);
                     } else {
                         List<Double> so2_add = new ArrayList();
                         so2_add.add(so2);
@@ -137,11 +147,11 @@ public class AirQMonthTask {
 
                     no2 = 0.0D;
                     if (data.get("A21004_AVG") != null) {
-                        no2 = (Double)data.get("A21004_AVG");
+                        no2 = (Double) data.get("A21004_AVG");
                     }
 
                     if (no2_data.containsKey(mn)) {
-                        ((List)no2_data.get(mn)).add(no2);
+                        ((List) no2_data.get(mn)).add(no2);
                     } else {
                         List<Double> no2_add = new ArrayList();
                         no2_add.add(no2);
@@ -150,11 +160,11 @@ public class AirQMonthTask {
 
                     pm10 = 0.0D;
                     if (data.get("A3400224_AVG") != null) {
-                        pm10 = (Double)data.get("A3400224_AVG");
+                        pm10 = (Double) data.get("A3400224_AVG");
                     }
 
                     if (pm10_data.containsKey(mn)) {
-                        ((List)pm10_data.get(mn)).add(pm10);
+                        ((List) pm10_data.get(mn)).add(pm10);
                     } else {
                         List<Double> pm10_add = new ArrayList();
                         pm10_add.add(pm10);
@@ -163,11 +173,11 @@ public class AirQMonthTask {
 
                     pm2_5 = 0.0D;
                     if (data.get("A3400424_AVG") != null) {
-                        pm2_5 = (Double)data.get("A3400424_AVG");
+                        pm2_5 = (Double) data.get("A3400424_AVG");
                     }
 
                     if (pm2_5_data.containsKey(mn)) {
-                      pm2_5_data.get(mn).add(pm2_5);
+                        pm2_5_data.get(mn).add(pm2_5);
                     } else {
                         List<Double> pm2_5_add = new ArrayList();
                         pm2_5_add.add(pm2_5);
@@ -186,35 +196,35 @@ public class AirQMonthTask {
                 if (pm2_5_data.size() > 0) {
                     Iterator var59 = pm2_5_data.keySet().iterator();
 
-                    while(var59.hasNext()) {
-                        String mn = (String)var59.next();
+                    while (var59.hasNext()) {
+                        String mn = (String) var59.next();
                         double o3_s = 160.0D;
-                        o3_c = MathCalcUtil.percentile((List)o3_data.get(mn), 90.0D);
+                        o3_c = MathCalcUtil.percentile((List) o3_data.get(mn), 90.0D);
                         co = CommonsUtil.numberFormat(o3_c / o3_s);
                         so2 = 60.0D;
-                        no2 = MathCalcUtil.avg((List)so2_data.get(mn), 2);
+                        no2 = MathCalcUtil.avg((List) so2_data.get(mn), 2);
                         pm10 = CommonsUtil.numberFormat(no2 / so2);
                         pm2_5 = 40.0D;
-                        double no2_c = MathCalcUtil.avg((List)no2_data.get(mn), 2);
+                        double no2_c = MathCalcUtil.avg((List) no2_data.get(mn), 2);
                         double no2_i = CommonsUtil.numberFormat(no2_c / pm2_5);
                         double co_s = 4.0D;
-                        double co_c = MathCalcUtil.percentile((List)co_data.get(mn), 95.0D);
+                        double co_c = MathCalcUtil.percentile((List) co_data.get(mn), 95.0D);
                         double co_i = CommonsUtil.numberFormat(co_c / co_s);
                         double pm2_5_s = 35.0D;
-                        double pm2_5_c = MathCalcUtil.avg((List)pm2_5_data.get(mn), 2);
+                        double pm2_5_c = MathCalcUtil.avg((List) pm2_5_data.get(mn), 2);
                         double pm2_5_i = CommonsUtil.numberFormat(pm2_5_c / pm2_5_s);
                         double pm10_s = 70.0D;
-                        double pm10_c = MathCalcUtil.avg((List)pm10_data.get(mn), 2);
+                        double pm10_c = MathCalcUtil.avg((List) pm10_data.get(mn), 2);
                         double pm10_i = CommonsUtil.numberFormat(pm10_c / pm10_s);
                         double total_i = CommonsUtil.numberFormat(co + pm10 + no2_i + co_i + pm2_5_i + pm10_i);
                         int finedays = 0;
                         if (fineDays.get(mn) != null) {
-                            finedays = (Integer)fineDays.get(mn);
+                            finedays = (Integer) fineDays.get(mn);
                         }
 
                         params.add(CommonsUtil.createUUID1());
                         params.add(lastDate);
-                        params.add(new Date());
+                        params.add(DateUtil.formatDateTime(new Date()));
                         params.add(mn);
                         params.add(finedays);
                         params.add(total_i);
@@ -237,13 +247,13 @@ public class AirQMonthTask {
                         params.add(co_i);
                         params.add(co);
                         this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(insert_month_sql, params));
+                        params = new ArrayList<>();
                     }
                 }
             }
         }
 
     }
-
 
 
 }
