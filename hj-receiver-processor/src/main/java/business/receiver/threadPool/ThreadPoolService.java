@@ -3,10 +3,12 @@ package business.receiver.threadPool;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 @Data
+@Component
 public class ThreadPoolService {
     private int reverseThreads = 20;
     private int receiveThreads = 80;

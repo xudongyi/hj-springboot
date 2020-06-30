@@ -5,8 +5,6 @@ import business.receiver.entity.SysDeviceMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 @Component
 public interface  SysDeviceMessageMapper extends BaseMapper<SysDeviceMessage> {
     /**创建废水，废气的报文接收表**/

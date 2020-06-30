@@ -15,8 +15,6 @@ import java.util.*;
 @Slf4j
 public class ReverseService {
     @Autowired
-    private IBaseDao baseDao;
-    @Autowired
     private ThreadPoolService threadPoolService;
     private static Map<String, List<ReverseBean>> sendData = new HashMap();
     private static Map<String, ChannelHandlerContext> chennel = new HashMap();
@@ -103,7 +101,8 @@ public class ReverseService {
         params.add(results);
         params.add(qn);
         params.add(mn);
-        this.baseDao.sqlExcute(sql, params);
+        //TODO 111
+        //this.baseDao.sqlExcute(sql, params);
     }
 
     public void setChennel(String mn, ChannelHandlerContext ctx) {

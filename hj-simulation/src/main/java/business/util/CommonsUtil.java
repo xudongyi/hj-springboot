@@ -4,15 +4,16 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class CommonsUtil {
     public CommonsUtil() {
     }
-
+    public static String dateCurrent(String formatStr) {
+        SimpleDateFormat sf = new SimpleDateFormat(formatStr);
+        return sf.format(new Date());
+    }
     public static String createUUID() {
         String uuid = UUID.randomUUID().toString();
         return uuid;

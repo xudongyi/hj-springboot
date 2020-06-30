@@ -1,12 +1,23 @@
 package business.processor.service;
 
+import business.processor.mapper.MonitorMapper;
+import business.receiver.bean.MonitorBean;
+import business.redis.RedisService;
+import business.util.CommonsUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
 @Service("monitorService")
-public class MonitorService {
-    private static Logger LOG = Logger.getLogger(MonitorService.class);
+@Slf4j
+public class MonitorService{
     @Autowired
     private RedisService redisService;
     @Autowired
-    private IBaseDao baseDao;
+    private MonitorMapper monitorMapper;
 
     public MonitorService() {
     }
@@ -19,11 +30,11 @@ public class MonitorService {
 
             while(var3.hasNext()) {
                 String mn = (String)var3.next();
-                MonitorBean monitor = (MonitorBean)CommonsUtil.toJsonObject((String)map.get(mn), MonitorBean.class);
+                MonitorBean monitor = (MonitorBean) CommonsUtil.toJsonObject((String)map.get(mn), MonitorBean.class);
                 result.put(mn, monitor);
             }
         } else {
-            LOG.debug("Redis提示[获取所有监控点]:未取到值");
+            log.debug("Redis提示[获取所有监控点]:未取到值");
         }
 
         return result;
@@ -35,7 +46,7 @@ public class MonitorService {
         if (StringUtils.isNotEmpty(time)) {
             result = CommonsUtil.dateParse(time, "yyyy-MM-dd HH:mm:ss.SSS");
         } else {
-            LOG.debug("Redis提示[获取MN" + mn + "最后数据（实时）上传时间]:未取到值");
+            log.debug("Redis提示[获取MN" + mn + "最后数据（实时）上传时间]:未取到值");
         }
 
         return result;
@@ -52,7 +63,7 @@ public class MonitorService {
         if (StringUtils.isNotEmpty(time)) {
             result = CommonsUtil.dateParse(time, "yyyy-MM-dd HH:mm:ss.SSS");
         } else {
-            LOG.debug("Redis提示[获取MN最后数据（小时）上传时间]:未取到值");
+            log.debug("Redis提示[获取MN最后数据（小时）上传时间]:未取到值");
         }
 
         return result;
@@ -69,7 +80,7 @@ public class MonitorService {
         if (StringUtils.isNotEmpty(time)) {
             result = CommonsUtil.dateParse(time, "yyyy-MM-dd HH:mm:ss.SSS");
         } else {
-            LOG.debug("Redis提示[获取MN最后数据（日）上传时间]:未取到值");
+            log.debug("Redis提示[获取MN最后数据（日）上传时间]:未取到值");
         }
 
         return result;
@@ -89,18 +100,17 @@ public class MonitorService {
 
         for(int i = 0; i < mnList.size(); ++i) {
             params.add(new Object[]{onlineStatus, mnList.get(i)});
+            this.monitorMapper.updateMonitorStatus("online_status",mnList.get(i),onlineStatus);
         }
-
-        this.baseDao.sqlBatchExcute("update mon_monitor set online_status=? where mn=?", params);
     }
 
     public void setDataStatus(String mn, int dataStatus) {
-        MonitorBean monitor = (MonitorBean)this.getAllMonitors().get(mn);
+        MonitorBean monitor = this.getAllMonitors().get(mn);
         if (monitor != null && dataStatus != monitor.getDataStatus()) {
             List<Object> params = new ArrayList();
             params.add(dataStatus);
             params.add(mn);
-            this.baseDao.sqlExcute("update mon_monitor set data_status=? where mn=? ", params);
+            this.monitorMapper.updateMonitorStatus("data_status",mn,dataStatus);
             monitor.setDataStatus(dataStatus);
             this.redisService.setMapValue("mn_monitor_map", mn, monitor);
         }
@@ -108,12 +118,12 @@ public class MonitorService {
     }
 
     public void setDeviceStatus(String mn, int deviceStatus) {
-        MonitorBean monitor = (MonitorBean)this.getAllMonitors().get(mn);
+        MonitorBean monitor = this.getAllMonitors().get(mn);
         if (monitor != null && deviceStatus != monitor.getDeviceStatus()) {
             List<Object> params = new ArrayList();
             params.add(deviceStatus);
             params.add(mn);
-            this.baseDao.sqlExcute("update mon_monitor set device_status=? where mn=? ", params);
+            this.monitorMapper.updateMonitorStatus("device_status",mn,deviceStatus);
             monitor.setDeviceStatus(deviceStatus);
             this.redisService.setMapValue("mn_monitor_map", mn, monitor);
         }

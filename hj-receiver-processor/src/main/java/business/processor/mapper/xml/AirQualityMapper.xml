@@ -7,7 +7,7 @@
         SELECT * FROM AIRQ_AQI ORDER BY FACTOR_CODE,TYPE,L_VALUE
     </select>
     <select id="getAIRQ_LEVEL" resultType="java.util.HashMap">
-        SELECT * FROM BAK_AIRQ_LEVEL ORDER BY AQI_L
+        SELECT * FROM AIRQ_LEVEL ORDER BY AQI_L
     </select>
 
 </mapper>

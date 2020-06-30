@@ -42,8 +42,8 @@ public class AirQualityService {
             List<AirqAQIBean> list = (List) CommonsUtil.toJsonObject(result, AirqAQIBean.class);
             if (list != null) {
                 for(int i = 0; i < list.size(); ++i) {
-                    if (((AirqAQIBean)list.get(i)).getHighValue() >= avg && ((AirqAQIBean)list.get(i)).getLowValue() <= avg) {
-                        aqi = this.calcuteAQI(((AirqAQIBean)list.get(i)).getHiAqi(), ((AirqAQIBean)list.get(i)).getLiAqi(), ((AirqAQIBean)list.get(i)).getHighValue(), ((AirqAQIBean)list.get(i)).getLowValue(), avg);
+                    if (list.get(i).getHighValue() >= avg && (list.get(i)).getLowValue() <= avg) {
+                        aqi = this.calcuteAQI((list.get(i)).getHiAqi(), (list.get(i)).getLiAqi(), (list.get(i)).getHighValue(), (list.get(i)).getLowValue(), avg);
                         break;
                     }
                 }
@@ -67,7 +67,7 @@ public class AirQualityService {
             for(int i = 0; i < data.size(); ++i) {
                 try {
                     AirqAQIBean v = new AirqAQIBean();
-                    Map<String, Object> map = (Map)data.get(i);
+                    Map<String, Object> map = data.get(i);
                     v.setCode((String)map.get("FACTOR_CODE"));
                     if (map.get("LI_AQI") != null) {
                         v.setLiAqi((Double)map.get("LI_AQI"));

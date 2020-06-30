@@ -1,16 +1,19 @@
 package business.processor.excute;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import business.processor.bean.DataFactorBean;
 import business.processor.bean.DataPacketBean;
 import business.processor.bean.FactorBean;
 import business.processor.excute.airq.AirQDataExcuter;
+import business.processor.service.FactorService;
+import business.processor.task.UpdateTableFieldTask;
+import business.receiver.mapper.MyBaseMapper;
+import business.receiver.mapper.SysDeviceMessageMapper;
 import business.util.CommonsUtil;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,14 @@ import org.springframework.stereotype.Service;
 public class DataParserService {
     @Autowired
     private AirQDataExcuter airQDataExcuter;
+    @Autowired
+    private SysDeviceMessageMapper sysDeviceMessageMapper;
+    @Autowired
+    private FactorService factorService;
+    @Autowired
+    private UpdateTableFieldTask updateTableFieldTask;
+    @Autowired
+    private MyBaseMapper myBaseMapper;
 
     public DataParserService() {
     }
@@ -73,13 +84,13 @@ public class DataParserService {
             String[] var14 = factorGroupsData;
             int var15 = factorGroupsData.length;
 
-            for(int var16 = 0; var16 < var15; ++var16) {
+            for (int var16 = 0; var16 < var15; ++var16) {
                 String factorData = var14[var16];
                 String[] factorItems = factorData.split(",");
                 DataFactorBean dataFactorBean = new DataFactorBean();
                 String factorCode = "";
 
-                for(int i = 0; i < factorItems.length; ++i) {
+                for (int i = 0; i < factorItems.length; ++i) {
                     String factorItem = factorItems[i];
                     String[] factorCodeValue = factorItem.split("=");
                     if (factorCodeValue.length == 2) {
@@ -245,8 +256,7 @@ public class DataParserService {
                 tag = 9;
             }
         }
-
-        this.bakSourceService.updateTag(bakSourceSql_update, dataPacketBean.getSourceId(), tag);
+        this.sysDeviceMessageMapper.updateTag("sys_device_message_" + DateUtil.format(new Date(), "yyMM"), dataPacketBean.getSourceId(), tag);
         if (showlog) {
             System.out.println("报文解析完成【" + dataPacketBean.getSourceId() + "】" + "TAG=" + tag);
         }
@@ -261,53 +271,53 @@ public class DataParserService {
         String tableName = null;
         if (st.equals("32")) {
             if (cn.equals("2051")) {
-                tableName = "BAK_WATER_MINUTE_" + month;
+                tableName = "WATER_MINUTE_" + month;
             } else if (cn.equals("2061")) {
-                tableName = "BAK_WATER_HOUR";
+                tableName = "WATER_HOUR";
             } else if (cn.equals("2031")) {
-                tableName = "BAK_WATER_DAY";
+                tableName = "WATER_DAY";
             }
         } else if (st.equals("31")) {
             if (cn.equals("2051")) {
-                tableName = "BAK_AIR_MINUTE_" + month;
+                tableName = "AIR_MINUTE_" + month;
             } else if (cn.equals("2061")) {
-                tableName = "BAK_AIR_HOUR";
+                tableName = "AIR_HOUR";
             } else if (cn.equals("2031")) {
-                tableName = "BAK_AIR_DAY";
+                tableName = "AIR_DAY";
             } else if (cn.equals("3020")) {
-                tableName = "BAK_AIR_INCINERATOR_CURRENT";
+                tableName = "AIR_INCINERATOR_CURRENT";
             }
         } else if (st.equals("22")) {
             if (cn.equals("2061")) {
-                tableName = "BAK_AIRQ_HOUR";
+                tableName = "AIRQ_HOUR";
             } else if (cn.equals("2031")) {
-                tableName = "BAK_AIRQ_DAY";
+                tableName = "AIRQ_DAY";
             }
         } else if (st.equals("23")) {
             if (cn.equals("2011")) {
-                tableName = "BAK_NOISE_CURRENT_TR_" + month;
+                tableName = "NOISE_CURRENT_TR_" + month;
             } else if (cn.equals("2051")) {
-                tableName = "BAK_NOISE_MINUTE_" + month;
+                tableName = "NOISE_MINUTE_" + month;
             } else if (cn.equals("2061")) {
-                tableName = "BAK_NOISE_HOUR";
+                tableName = "NOISE_HOUR";
             } else if (cn.equals("2031")) {
-                tableName = "BAK_NOISE_DAY";
+                tableName = "NOISE_DAY";
             }
         } else if (st.equals("21")) {
             if (cn.equals("2061")) {
-                tableName = "BAK_SURFWATER_HOUR";
+                tableName = "SURFWATER_HOUR";
             } else if (cn.equals("2031")) {
-                tableName = "BAK_SURFWATER_DAY";
+                tableName = "SURFWATER_DAY";
             }
         }
 
         if (st.equals("27")) {
             if (cn.equals("2051")) {
-                tableName = "BAK_VOC_MINUTE_" + month;
+                tableName = "VOC_MINUTE_" + month;
             } else if (cn.equals("2061")) {
-                tableName = "BAK_VOC_HOUR";
+                tableName = "VOC_HOUR";
             } else if (cn.equals("2031")) {
-                tableName = "BAK_VOC_DAY";
+                tableName = "VOC_DAY";
             }
         }
 
@@ -315,18 +325,8 @@ public class DataParserService {
     }
 
     public boolean isExistMHDData(DataPacketBean dataPacketBean) {
-        String sql = "SELECT COUNT(1) AS COUNTNUM FROM " + this.getMHDTableName(dataPacketBean) + " WHERE DATA_TIME=? AND MN=?";
-        List<Object> params = new ArrayList();
-        params.add(dataPacketBean.getDataTime());
-        params.add(dataPacketBean.getMn());
-        List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
-        if (list != null && list.size() > 0) {
-            long i = (Long)list.get(0).get("COUNTNUM");
-            if (i > 0L) {
-                return true;
-            }
-        }
-
+        int count= myBaseMapper.isExistMHDData(this.getMHDTableName(dataPacketBean),DateUtil.format(dataPacketBean.getDataTime(),"yyyy-MM-dd HH:mm:ss"),dataPacketBean.getMn());
+        if(count>0) return true;
         return false;
     }
 }

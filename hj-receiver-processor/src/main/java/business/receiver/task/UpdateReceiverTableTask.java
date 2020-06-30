@@ -49,14 +49,6 @@ public class UpdateReceiverTableTask {
     @PostConstruct
     public void initial() {
         this.excuteBakSourceTable();
-        if (!this.baseDao.isExistTable("BAK_REVERSE_LOG")) {
-            List<Object> params = new ArrayList();
-            params.add("指令类型:1-开阀;2-关阀;3-留样;4-设置现场时间;5-获取现场时间;6-小时数据补遗;7-日数据补遗;");
-            params.add("状态:0-未发;1-已发;2-已接收;3-执行成功;4-执行失败;5-发送失败;");
-            params.add("是否已生成取样单:1-否;2-是;");
-            this.baseDao.sqlExcute(TableSqlConstant.BAK_REVERSE_LOG_SQL.toPattern(), params);
-        }
-
         isInitial = true;
     }
 
@@ -81,7 +73,6 @@ public class UpdateReceiverTableTask {
         if (commonMapper.checkTableExists(tableName)==0) {
             sysDeviceMessageMapper.createSysDeviceMessageTable(tableName);
         }
-
     }
 
     public static String getBakSourceSql_insert_auto() {
@@ -102,12 +93,11 @@ public class UpdateReceiverTableTask {
 
     public static void setBakSourceQuerySql(String yyMM) {
         synchronized(bakSourceSql_query_hand) {
-            bakSourceSql_query_hand = "select * from BAK_SOURCE_" + yyMM + " WHERE ID>? and TAG = 0 order by ID asc limit 0," + countLimit + "";
-            DataParserHandTask.bakSourceDataId = -1L;
+            bakSourceSql_query_hand = "select * from sys_device_message_" + yyMM + " WHERE ID>? and TAG = 0 order by ID asc limit 0," + countLimit + "";
         }
 
         synchronized(bakSourceSql_update_hand) {
-            bakSourceSql_update_hand = "update BAK_SOURCE_" + yyMM + " set TAG =? where ID=? ";
+            bakSourceSql_update_hand = "sqlExcute sys_device_message_" + yyMM + " set TAG =? where ID=? ";
         }
     }
 

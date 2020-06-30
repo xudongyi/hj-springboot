@@ -3,9 +3,12 @@ package business.processor.service;
 import business.processor.bean.DataFactorBean;
 import business.processor.bean.MonitorDeviceBean;
 import business.processor.bean.WarnRuleBean;
+import business.processor.mapper.MonitorMapper;
 import business.receiver.bean.MonitorBean;
+import business.receiver.mapper.MyBaseMapper;
 import business.redis.RedisService;
 import business.util.CommonsUtil;
+import business.util.SqlBuilder;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +22,12 @@ public class MonitorDeviceService {
     @Autowired
     private RedisService redisService;
     @Autowired
-    private IBaseDao baseDao;
-    @Autowired
     private WarnService warnService;
 
+    @Autowired
+    private MyBaseMapper myBaseMapper;
+    @Autowired
+    private MonitorMapper monitorMapper;
     public MonitorDeviceService() {
     }
 
@@ -34,8 +39,8 @@ public class MonitorDeviceService {
                 List<MonitorDeviceBean> list = (List) CommonsUtil.toJsonObject(result, MonitorDeviceBean.class);
                 if (list != null) {
                     for(int i = 0; i < list.size(); ++i) {
-                        if (factorCode != null && factorCode.equals(((MonitorDeviceBean)list.get(i)).getFactorCode().toUpperCase())) {
-                            device = (MonitorDeviceBean)list.get(i);
+                        if (factorCode != null && factorCode.equals((list.get(i)).getFactorCode().toUpperCase())) {
+                            device = list.get(i);
                             break;
                         }
                     }
@@ -108,7 +113,7 @@ public class MonitorDeviceService {
                                 List<Object> params = new ArrayList();
                                 params.add(Integer.valueOf(deviceStatus));
                                 params.add(device.getDeviceId());
-                                this.baseDao.sqlExcute("update mon_device set device_status=? where device_id=? ", params);
+                                this.myBaseMapper.sqlExcute(SqlBuilder.buildSql("update mon_device set device_status={0} where device_id={1}",params));
                                 break;
                             }
                         }
@@ -149,11 +154,11 @@ public class MonitorDeviceService {
         String factorCode = bean.getFactorCode();
         Date dataTime = bean.getDataTime();
         String warnTime = CommonsUtil.dateCurrent("yyyy-MM-dd HH:mm:ss");
-        String sql = "SELECT * FROM BAK_DEVICE_STATE WHERE MN=? AND CODE=? ORDER BY CREATE_TIME DESC";
+        String sql = "SELECT * FROM DEVICE_STATE WHERE MN=''{0}'' AND CODE=''{1}'' ORDER BY CREATE_TIME DESC";
         List<Object> params = new ArrayList();
         params.add(mn);
         params.add(factorCode);
-        List<Map<String, Object>> lastDeviceStateData = this.baseDao.sqlQuery(sql, params);
+        List<Map<String, Object>> lastDeviceStateData =  this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(sql,params));
         boolean isAdd = false;
         Map warnRule;
         if (lastDeviceStateData != null && lastDeviceStateData.size() > 0) {
@@ -162,8 +167,8 @@ public class MonitorDeviceService {
             params.add(now);
             params.add(dataTime);
             params.add(warnRule.get("ID"));
-            sql = "UPDATE BAK_DEVICE_STATE SET END_TIME=?,DATA_TIME=? WHERE ID=?";
-            this.baseDao.sqlExcute(sql, params);
+            sql = "UPDATE DEVICE_STATE SET END_TIME=''{0}'',DATA_TIME=''{1}'' WHERE ID={2}";
+            this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql,params));
             int lastState = (Integer)warnRule.get("STATE");
             if (lastState != Integer.valueOf(thisState)) {
                 isAdd = true;
@@ -182,21 +187,20 @@ public class MonitorDeviceService {
             params.add(now);
             params.add(bean.getSampleTime());
             params.add(Integer.valueOf(thisState));
-            sql = "INSERT INTO BAK_DEVICE_STATE(ID,MN,CODE,DATA_TIME,CREATE_TIME,END_TIME,SAMPLE_TIME,STATE) VALUES(?,?,?,?,?,?,?,?)";
+            sql = "INSERT INTO DEVICE_STATE(ID,MN,CODE,DATA_TIME,CREATE_TIME,END_TIME,SAMPLE_TIME,STATE) VALUES(?,?,?,?,?,?,?,?)";
             this.baseDao.sqlExcute(sql, params);
         }
 
         if (!thisState.equals("0")) {
-            warnRule = null;
-            WarnRuleBean warnRule;
+            WarnRuleBean warnRuleBean ;
             if (monitorType != 3 && monitorType != 5 && monitorType != 7) {
-                warnRule = this.warnService.getDeviceWarnRule(mn, factorCode);
+                warnRuleBean = this.warnService.getDeviceWarnRule(mn, factorCode);
             } else {
-                warnRule = this.warnService.getEnvirDeviceWarnRule();
+                warnRuleBean = this.warnService.getEnvirDeviceWarnRule();
             }
 
-            String warnMessage = monitor.getMonitorName() + "监测设备[" + device.getDeviceName() + "]于" + warnTime + "出现异常：" + (String)this.getDeviceStatusDic().get(thisState) + "。";
-            this.warnService.checkWarnlog(bean.getDataTime(), warnRule, 3, warnMessage, monitor, factorCode);
+            String warnMessage = monitor.getMonitorName() + "监测设备[" + device.getDeviceName() + "]于" + warnTime + "出现异常：" + this.getDeviceStatusDic().get(thisState) + "。";
+            this.warnService.checkWarnlog(bean.getDataTime(), warnRuleBean, 3, warnMessage, monitor, factorCode);
         }
 
         this.setDeviceStatus(mn, factorCode, thisState);

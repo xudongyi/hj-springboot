@@ -129,7 +129,7 @@ public class GpsDataService {
             GpsBean gpsBean = (GpsBean)gps_tmp.get(key);
             if (gpsBean != null && !GpsConvert.isMove(gpsBean.getLng(), gpsBean.getLat(), baidu_lng, baidu_lat)) {
                 gpsBean.setRec_times(gpsBean.getRec_times() + 1L);
-                sql = "update hh_gps.gps_data set END_TIME=?,REC_TIMES=? where ID=? ";
+                sql = "sqlExcute hh_gps.gps_data set END_TIME=?,REC_TIMES=? where ID=? ";
                 params = new ArrayList();
                 params.add(dataTime);
                 params.add(gpsBean.getRec_times());

@@ -1,10 +1,12 @@
 package business.processor.excute.airq;
 
+import business.constant.OnlineDataConstant;
 import business.processor.bean.*;
 import business.processor.excute.DataParserService;
 import business.processor.service.*;
 import business.processor.task.UpdateTableFieldTask;
 import business.receiver.bean.MonitorBean;
+import business.receiver.mapper.MyBaseMapper;
 import business.util.CommonsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,8 @@ public class AirQDataExcuter {
     private AirQualityService airQualityService;
     @Autowired
     private UpdateTableFieldTask updateTableFieldTask;
-
+    @Autowired
+    private MyBaseMapper myBaseMapper;
     public AirQDataExcuter() {
     }
 
@@ -77,7 +80,7 @@ public class AirQDataExcuter {
         while(iterator.hasNext()) {
             String factorCode = (String)iterator.next();
             DataFactorBean bean = map.get(factorCode);
-            FactorBean factor = (FactorBean)this.factorService.getFactors(3).get(factorCode);
+            FactorBean factor = this.factorService.getFactors(3).get(factorCode);
             if (factor != null) {
                 MonitorDeviceBean device = this.monitorDeviceService.getDevice(monitorId, factorCode);
                 if (device != null) {
@@ -114,7 +117,7 @@ public class AirQDataExcuter {
         while(var13.hasNext()) {
             String factorCode = (String)var13.next();
             if (this.updateTableFieldTask.isFieldExist(factorCode, 3)) {
-                DataFactorBean bean = (DataFactorBean)map.get(factorCode);
+                DataFactorBean bean = map.get(factorCode);
                 if (bean.getAvg() != null) {
                     avg = bean.getAvg();
                     sql_field.append("," + factorCode + "_AVG");
@@ -193,20 +196,21 @@ public class AirQDataExcuter {
             WarnRuleBean warnRule = this.warnService.getEnviAirQWarnRule();
             if (warnRule != null) {
                 double warnLevel = warnRule.getMax();
-                double dataLevel = (Double)OnlineDataConstant.AQI_LEVEL.get(level);
+                double dataLevel = (Double) OnlineDataConstant.AQI_LEVEL.get(level);
                 if (dataLevel > warnLevel) {
                     if (monitor != null) {
                         String warnTime = CommonsUtil.dateFormat(dataPacketBean.getDataTime(), "yyyy-MM-dd HH");
-                        String warnMessage = monitor.getMonitorName() + "小时数据于" + warnTime + "时AQI报警，当前AQI值：" + aqi + "(" + (String)OnlineDataConstant.AQI_LEVEL_DESC.get(level) + ")。";
-                        this.warnService.checkWarnLog(dataPacketBean.getDataTime(), warnRule, 11, warnMessage, monitor, (String)null);
+                        String warnMessage = monitor.getMonitorName() + "小时数据于" + warnTime + "时AQI报警，当前AQI值：" + aqi + "(" + OnlineDataConstant.AQI_LEVEL_DESC.get(level) + ")。";
+                        //TODO 111
+                        //this.warnService.checkWarnLog(dataPacketBean.getDataTime(), warnRule, 11, warnMessage, monitor, (String)null);
                     } else {
                         log.error("AQI报警失败，未找到监控点" + mn);
                     }
                 }
             }
         }
-
-        this.baseDao.sqlExcute(sql_field.toString(), params);
+        //TODO 111
+        //this.myBaseMapper.sqlExcute(sql_field.toString(), params);
         if (cn.equals("2061")) {
             this.monitorService.setDeviceStatus(mn, monitorDeviceStatus);
             this.monitorService.setMnCurrentLastUpload(mn);

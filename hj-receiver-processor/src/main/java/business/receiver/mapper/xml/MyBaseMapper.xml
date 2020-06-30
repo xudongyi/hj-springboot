@@ -6,8 +6,23 @@
         SELECT COUNT(1) FROM information_schema.tables WHERE
         table_name = #{tableName}
     </select>
-    <select id="" resultType="java.util.List">
-         ${sql}
+
+    <select id="sqlQuery"  resultType="java.util.HashMap">
+        ${sql}
+    </select>
+    <insert id="insert">
+      ${sql}
+    </insert>
+
+    <delete id="delete">
+      ${sql}
+    </delete>
+    <update id="sqlExcute">
+      ${sql}
+    </update>
+    <select id="isExistMHDData"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1) AS COUNTNUM FROM  #{tableName} WHERE DATA_TIME=#{dataTime} AND MN=#{mn}
     </select>
 
 </mapper>
