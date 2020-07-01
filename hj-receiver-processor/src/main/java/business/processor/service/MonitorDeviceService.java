@@ -130,17 +130,9 @@ public class MonitorDeviceService {
 
     public Map<String, String> getDeviceStatusDic() {
         Map<String, String> map = new HashMap();
-        String result = this.redisService.getMapValue("dic", "deviceStatus");
-        if (StringUtils.isNotEmpty(result)) {
-            List<DicBean> list = (List) CommonsUtil.toJsonObject(result, DicBean.class);
-
-            for (int i = 0; i < list.size(); ++i) {
-                map.put(((DicBean) list.get(i)).getValue(), ((DicBean) list.get(i)).getText());
-            }
-        } else {
-            this.log.debug("Redis提示[获取数据字典设备状态deviceStatus]:未取到值");
-        }
-
+        map.put("0","故障");
+        map.put("1","维修");
+        map.put("2","停运");
         return map;
     }
 

@@ -22,13 +22,8 @@ public class WarnService {
     @Autowired
     private RedisService redisService;
     @Autowired
-    private IBaseDao baseDao;
-    @Autowired
     private SmsService smsService;
-    @Autowired
-    private ReverseControlService reverseControlService;
-    @Autowired
-    private BakOverproofPeriodService bakOverproofPeriodService;
+
     @Value("${warn.dataerror.maxmin}")
     private boolean isCheckDataError = false;
     @Value("${warn.overproof.hour}")
@@ -348,10 +343,11 @@ public class WarnService {
             }
 
             sql.append(" order by WARN_TIME desc ");
-            List<Map<String, Object>> result = this.baseDao.sqlQuery(sql.toString(), parmas);
+            //TODO 111
+          /*  List<Map<String, Object>> result = this.baseDao.sqlQuery(sql.toString(), parmas);
             if (result == null || result.isEmpty()) {
                 this.addWarnlog(dataTime, warnType, warnRule, monitor, monitor.getMonitorType(), factorCode, warnMessage);
-            }
+            }*/
 
         }
     }
@@ -391,15 +387,17 @@ public class WarnService {
                 }
 
                 this.smsService.sendMessage(contact, monitor.getMonitorName() + "于" + CommonsUtil.dateFormat(date, "yyyy-MM-dd HH:mm:ss") + "关阀,原因为：" + message);
-                this.reverseControlService.sendReverseCloseValve(mn, message);
+                //TODO 111
+                //this.reverseControlService.sendReverseCloseValve(mn, message);
             }
 
             if (warnRule.getIsSample() == 1 && warnType == 2) {
-                this.reverseControlService.sendReverseSample(mn, message);
+                //TODO 111
+                ///this.reverseControlService.sendReverseSample(mn, message);
             }
         }
 
-        String sql = "INSERT INTO WARN_log(ID,TYPE,MN,COMPANY_ID,WARN_TYPE,CODE,WARN_LEVEL,MESSAGE_STATUS,CONTENT,WARN_TIME)values(?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO sys_warn_log(ID,TYPE,MN,COMPANY_ID,WARN_TYPE,CODE,WARN_LEVEL,MESSAGE_STATUS,CONTENT,WARN_TIME)values(?,?,?,?,?,?,?,?,?,?)";
         List<Object> params = new ArrayList();
         params.add(CommonsUtil.createUUID1());
         params.add(monitor.getMonitorType());
@@ -411,12 +409,13 @@ public class WarnService {
         params.add(message_status);
         params.add(message);
         params.add(date);
-        this.baseDao.sqlExcute(sql, params);
+        //TODO 111
+        //this.baseDao.sqlExcute(sql, params);
     }
 
     public void addWaterOverproof(long source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value) {
         String factorCode = currentData.getFactorCode();
-        String sql = "insert into bak_water_current_overproof(ID,SOURCE_ID,MN,CODE,VALUE,STANDARD_VALUE,STATUS,DATA_TIME,SAMPLE_TIME)values(?,?,?,?,?,?,?,?,?)";
+        String sql = "insert into water_current_overproof(ID,SOURCE_ID,MN,CODE,VALUE,STANDARD_VALUE,STATUS,DATA_TIME,SAMPLE_TIME)values(?,?,?,?,?,?,?,?,?)";
         List<Object> params = new ArrayList();
         params.add(CommonsUtil.createUUID1());
         params.add(source_id);
@@ -427,16 +426,17 @@ public class WarnService {
         params.add(currentData.getState());
         params.add(dataTime);
         params.add(currentData.getSampleTime());
-        this.baseDao.sqlExcute(sql, params);
+        //TODO 111
+        //this.baseDao.sqlExcute(sql, params);
     }
 
     public void addAirOverproof(int tableType, long source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value, int zsFlag) {
         String factorCode = currentData.getFactorCode();
         String tableName = "";
         if (tableType == 2) {
-            tableName = "bak_air_current_overproof";
+            tableName = "air_current_overproof";
         } else if (tableType == 9) {
-            tableName = "bak_voc_current_overproof";
+            tableName = "voc_current_overproof";
         }
 
         String sql = "insert into " + tableName + "(ID,SOURCE_ID,MN,CODE,STANDARD_VALUE,VALUE,STATUS,DATA_TIME)values(?,?,?,?,?,?,?,?)";
@@ -455,7 +455,8 @@ public class WarnService {
         }
 
         params.add(dataTime);
-        this.baseDao.sqlExcute(sql, params);
+        //TODO 111
+        //this.baseDao.sqlExcute(sql, params);
     }
 
     public boolean checkCurrentAbnormal(WarnRuleBean warnRule, MonitorBean monitor, MonitorDeviceBean device, FactorBean factor, DataFactorBean bean) {
@@ -565,8 +566,8 @@ public class WarnService {
                 } else if (factorType == 9) {
                     this.addAirOverproof(factorType, sourceId, mn, dataTime, bean, warnSt, factor.getZsFlag());
                 }
-
-                this.bakOverproofPeriodService.excute(monitor, bean, factor, val, warnSt);
+                //TODO 111
+                //this.bakOverproofPeriodService.excute(monitor, bean, factor, val, warnSt);
                 if (isAbnormal) {
                     String message_level = warnRuleSt.getLevel() == 1 ? "超标" : "预警";
                     String over_level = result > 0 ? "上限" : "下限";

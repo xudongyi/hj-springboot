@@ -1,6 +1,7 @@
 package business.receiver.service;
 
 import business.receiver.bean.GpsBean;
+import business.receiver.mapper.MyBaseMapper;
 import business.receiver.threadPool.ThreadPoolService;
 import business.util.CommonsUtil;
 import business.util.GpsConvert;
@@ -18,24 +19,23 @@ import java.util.*;
 @Slf4j
 public class GpsDataService {
     @Autowired
-    private IBaseDao baseDao;
-    @Autowired
     private BlackListService blackListService;
     @Autowired
     private ThreadPoolService threadPoolService;
+
+    @Autowired
+    private MyBaseMapper myBaseMapper;
     private static Map<String, GpsBean> gps_tmp = new HashMap();
 
     public GpsDataService() {
     }
 
     public void accept(final String msg) {
-        this.threadPoolService.getReceivePool().execute(new Runnable() {
-            public void run() {
-                if (GpsDataService.this.checkData(msg)) {
-                    GpsDataService.this.excute(msg);
-                }
-
+        this.threadPoolService.getReceivePool().execute(() -> {
+            if (GpsDataService.this.checkData(msg)) {
+                GpsDataService.this.excute(msg);
             }
+
         });
     }
 
@@ -71,7 +71,7 @@ public class GpsDataService {
                 char[] a = data.toCharArray();
                 int result = a[1];
 
-                for(int i = 2; i < a.length; ++i) {
+                for (int i = 2; i < a.length; ++i) {
                     if (a[i] != '*') {
                         result ^= a[i];
                     }
@@ -126,10 +126,10 @@ public class GpsDataService {
             double baidu_lat = GpsConvert.convertNumber(baiduPoints[0], 6);
             String sql = null;
             List<Object> params = null;
-            GpsBean gpsBean = (GpsBean)gps_tmp.get(key);
+            GpsBean gpsBean = (GpsBean) gps_tmp.get(key);
             if (gpsBean != null && !GpsConvert.isMove(gpsBean.getLng(), gpsBean.getLat(), baidu_lng, baidu_lat)) {
                 gpsBean.setRec_times(gpsBean.getRec_times() + 1L);
-                sql = "sqlExcute hh_gps.gps_data set END_TIME=?,REC_TIMES=? where ID=? ";
+                sql = "update gps_data set END_TIME=?,REC_TIMES=? where ID=? ";
                 params = new ArrayList();
                 params.add(dataTime);
                 params.add(gpsBean.getRec_times());
@@ -147,7 +147,7 @@ public class GpsDataService {
                 gpsBean.setLng(baidu_lng);
                 gpsBean.setRec_times(1L);
                 gps_tmp.put(key, gpsBean);
-                sql = "insert into hh_gps.gps_data(ID,NO,LNG,LAT,SPEED,DIRECTION,BEGIN_TIME,END_TIME,REC_TIMES,DISTANCE)values(?,?,?,?,?,?,?,?,?,?)";
+                sql = "insert into  gps_data(ID,NO,LNG,LAT,SPEED,DIRECTION,BEGIN_TIME,END_TIME,REC_TIMES,DISTANCE)values(?,?,?,?,?,?,?,?,?,?)";
                 params = new ArrayList();
                 params.add(id);
                 params.add(key);
