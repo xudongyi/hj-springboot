@@ -103,7 +103,7 @@ public class AirQDataExcuter {
         StringBuilder sql_value = new StringBuilder();
         List<Object> params = new ArrayList();
         sql_field.append("INSERT INTO " + this.dataParserService.getMHDTableName(dataPacketBean) + "(ID,DATA_TIME,CREATE_TIME,MN,STATE");
-        sql_value.append(")VALUES({0},''{1}'',''{2}'',''{3}'',{4}");
+        sql_value.append(")VALUES(''{0}'',''{1}'',''{2}'',''{3}'',{4}");
         params.add(CommonsUtil.createUUID1());
         params.add(DateUtil.formatDateTime(dataPacketBean.getDataTime()));
         params.add(DateUtil.formatDateTime(new Date()));
@@ -193,7 +193,7 @@ public class AirQDataExcuter {
             WarnRuleBean warnRule = this.warnService.getEnviAirQWarnRule();
             if (warnRule != null) {
                 double warnLevel = warnRule.getMax();
-                double dataLevel = (Double) OnlineDataConstant.AQI_LEVEL.get(level);
+                double dataLevel = OnlineDataConstant.AQI_LEVEL.get(level);
                 if (dataLevel > warnLevel) {
                     if (monitor != null) {
                         String warnTime = CommonsUtil.dateFormat(dataPacketBean.getDataTime(), "yyyy-MM-dd HH");

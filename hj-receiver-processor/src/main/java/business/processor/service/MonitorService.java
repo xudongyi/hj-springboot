@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service("monitorService")
@@ -23,8 +24,15 @@ public class MonitorService{
     }
 
 
+    @PostConstruct
     public void initMonitor(){
         List<Map<String,Object>> monitors = monitorMapper.getAllMonitor();
+        for(Map<String,Object> map : monitors){
+            MonitorBean monitorBean = new MonitorBean();
+            String mn = map.get("mn").toString();
+            monitorBean.setMn(mn);
+            setMonitor(mn,monitorBean);
+        }
     }
 
     public Map<String, MonitorBean> getAllMonitors() {
