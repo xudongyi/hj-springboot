@@ -1,6 +1,8 @@
 package business.receiver.task;
 
+import business.receiver.mapper.MyBaseMapper;
 import business.util.CommonsUtil;
+import business.util.SqlBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,7 +15,7 @@ import java.util.*;
 public class HwStoreDataTask {
     public static boolean isCreatingData = false;
     @Autowired
-    private IBaseDao baseDao;
+    private MyBaseMapper myBaseMapper;
 
     public HwStoreDataTask() {
     }
@@ -37,7 +39,7 @@ public class HwStoreDataTask {
             String existThisMonth_sql = "select * from hh_hwstore.store_period where MONTH=? and MN=? and WASTE_NAME=? and WASTE_CODE=?";
             String sql = "insert into hh_hwstore.store_period(ID,MONTH,MN,WASTE_NAME,WASTE_CODE,IN_AMOUNT,OUT_AMOUNT,BEGIN_AMOUNT,END_AMOUNT,SELF_AMOUNT,TRANSFER_AMOUNT,DIFF_AMOUNT)values(?,?,?,?,?,?,?,?,?,?,?,?)";
             params.add(lastMonth);
-            List<Map<String, Object>> list = this.baseDao.sqlQuery(query_sql, params);
+            List<Map<String, Object>> list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(query_sql, params));
             if (list != null && !list.isEmpty()) {
                 Iterator var10 = list.iterator();
 
@@ -55,7 +57,7 @@ public class HwStoreDataTask {
                         params.add(data.get("MN"));
                         params.add(data.get("WASTE_NAME"));
                         params.add(data.get("WASTE_CODE"));
-                        existData = this.baseDao.sqlQuery(existThisMonth_sql, params);
+                        existData = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(existThisMonth_sql, params));
                     } while(existData != null && !existData.isEmpty());
 
                     params = new ArrayList();
@@ -71,7 +73,7 @@ public class HwStoreDataTask {
                     params.add(0.0D);
                     params.add(0.0D);
                     params.add(0.0D);
-                    this.baseDao.sqlExcute(sql, params);
+                    this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
                 }
             }
         } catch (Exception var16) {

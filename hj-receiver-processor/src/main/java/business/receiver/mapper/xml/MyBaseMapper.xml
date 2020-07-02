@@ -4,7 +4,7 @@
     <select id="checkTableExists"
             resultType="java.lang.Integer">
         SELECT COUNT(1) FROM information_schema.tables WHERE
-        table_name = #{tableName}
+        table_name = #{tableName} or table_name = lower(#{tableName}) or table_name = upper(#{tableName})
     </select>
 
     <select id="sqlQuery"  resultType="java.util.HashMap">
@@ -22,7 +22,7 @@
     </update>
     <select id="isExistMHDData"
             resultType="java.lang.Integer">
-        SELECT COUNT(1) AS COUNTNUM FROM  #{tableName} WHERE DATA_TIME=#{dataTime} AND MN=#{mn}
+        SELECT COUNT(1) AS COUNTNUM FROM  ${tableName} WHERE DATA_TIME= #{dataTime} AND MN= #{mn}
     </select>
 
 </mapper>

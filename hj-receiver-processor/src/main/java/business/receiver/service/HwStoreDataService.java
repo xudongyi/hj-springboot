@@ -1,8 +1,10 @@
 package business.receiver.service;
 
+import business.receiver.mapper.MyBaseMapper;
 import business.receiver.task.HwStoreDataTask;
 import business.receiver.threadPool.ThreadPoolService;
 import business.util.CommonsUtil;
+import business.util.SqlBuilder;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,12 +22,11 @@ import java.util.Map;
 @Slf4j
 public class HwStoreDataService {
     @Autowired
-    private IBaseDao baseDao;
-    @Autowired
     private BlackListService blackListService;
     @Autowired
     private ThreadPoolService threadPoolService;
-
+    @Autowired
+    private MyBaseMapper myBaseMapper;
     public HwStoreDataService() {
     }
 
@@ -100,7 +101,7 @@ public class HwStoreDataService {
         params.add(data.get("MN"));
         params.add(data.get("WASTE_CODE"));
         params.add(data.get("WASTE_NAME"));
-        List<Map<String, Object>> list = this.baseDao.sqlQuery("select * from hh_hwstore.store_current where MN=? and WASTE_CODE=? and WASTE_NAME=? ", params);
+        List<Map<String, Object>> list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql("select * from hh_hwstore.store_current where MN=? and WASTE_CODE=? and WASTE_NAME=? ", params));
         if (list != null && list.size() > 0) {
             String id = (String) list.get(0).get("ID");
             this.updateCurrentStore(data, id);
@@ -124,7 +125,7 @@ public class HwStoreDataService {
             params.add(Double.valueOf((String) data.get("NEW_AMOUNT")));
         }
 
-        this.baseDao.sqlExcute(sql, params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
     private void updateCurrentStore(Map<String, String> data, String id) {
@@ -138,7 +139,7 @@ public class HwStoreDataService {
 
         params.add(CommonsUtil.dateParse(data.get("DataTime"), "yyyyMMddHHmmss"));
         params.add(id);
-        this.baseDao.sqlExcute(sql, params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
     private void saveHistoryStore(Map<String, String> data) {
@@ -185,7 +186,7 @@ public class HwStoreDataService {
             params_waste_source.add(data.get("BATCH_NO"));
         }
 
-        List<Map<String, Object>> waste_source_list = this.baseDao.sqlQuery(waste_source_sql, params_waste_source);
+        List<Map<String, Object>> waste_source_list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(waste_source_sql, params_waste_source));
         if (waste_source_list != null && waste_source_list.size() > 0) {
             for (int i = 0; i < waste_source_list.size(); ++i) {
                 String data_waste_source = (String) ((Map) waste_source_list.get(i)).get("WASTE_SOURCE");
@@ -212,7 +213,7 @@ public class HwStoreDataService {
         params.add(workshop);
         params.add(data.get("TRANSFER_MANAGER"));
         params.add(data.get("STORE_MANAGER"));
-        this.baseDao.sqlExcute(sql, params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
     private void saveInventoryStore(Map<String, String> data) {
@@ -228,7 +229,7 @@ public class HwStoreDataService {
         params.add(Integer.valueOf(data.get("TYPE")));
         params.add(CommonsUtil.dateParse(data.get("DataTime"), "yyyyMMddHHmmss"));
         params.add(data.get("OPERATOR"));
-        this.baseDao.sqlExcute(sql, params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
     private void savePeriodStore(Map<String, String> data) {
@@ -238,7 +239,7 @@ public class HwStoreDataService {
         params.add(data.get("WASTE_CODE"));
         params.add(data.get("WASTE_NAME"));
         params.add(((String) data.get("DataTime")).substring(0, 6));
-        List<Map<String, Object>> list = this.baseDao.sqlQuery("select * from hh_hwstore.store_period where MN=? and WASTE_CODE=? and WASTE_NAME=? and MONTH=?", params);
+        List<Map<String, Object>> list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql("select * from hh_hwstore.store_period where MN=? and WASTE_CODE=? and WASTE_NAME=? and MONTH=?", params));
         if (list != null && list.size() > 0) {
             this.updatePeriodStore(data, (Map) list.get(0));
         } else {
@@ -312,7 +313,7 @@ public class HwStoreDataService {
         params.add(SELF_AMOUNT);
         params.add(TRANSFER_AMOUNT);
         params.add(DIFF_AMOUNT);
-        this.baseDao.sqlExcute(sql, params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
     private void updatePeriodStore(Map<String, String> data, Map<String, Object> existData) {
@@ -408,7 +409,7 @@ public class HwStoreDataService {
 
         sql.append(" where ID=?");
         params.add(existData.get("ID"));
-        this.baseDao.sqlExcute(sql.toString(), params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql.toString(), params));
     }
 
     private boolean isExistStoreHistory(Map<String, String> data) {
@@ -417,7 +418,7 @@ public class HwStoreDataService {
         params.add(data.get("MN"));
         params.add(data.get("BATCH_NO"));
         params.add(Integer.valueOf((String) data.get("TYPE")));
-        List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
+        List<Map<String, Object>> list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(sql, params));
         return list != null && !list.isEmpty();
     }
 
@@ -426,7 +427,7 @@ public class HwStoreDataService {
         List<Object> params = new ArrayList();
         params.add(data.get("MN"));
         params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
-        List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
+        List<Map<String, Object>> list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(sql, params));
         return list == null || list.isEmpty();
     }
 
@@ -435,7 +436,7 @@ public class HwStoreDataService {
         List<Object> params = new ArrayList();
         params.add(data.get("MN"));
         params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
-        List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
+        List<Map<String, Object>> list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(sql, params));
         return list != null && !list.isEmpty();
     }
 
@@ -444,7 +445,7 @@ public class HwStoreDataService {
         List<Object> params = new ArrayList();
         params.add(data.get("MN"));
         params.add(CommonsUtil.dateParse((String) data.get("DataTime"), "yyyyMMddHHmmss"));
-        List<Map<String, Object>> list = this.baseDao.sqlQuery(sql, params);
+        List<Map<String, Object>> list = this.myBaseMapper.sqlQuery(SqlBuilder.buildSql(sql, params));
         return list == null || list.isEmpty();
     }
 }

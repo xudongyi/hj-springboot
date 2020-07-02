@@ -2,10 +2,14 @@ package business.receiver.service;
 
 import business.processor.bean.DataPacketBean;
 import business.processor.excute.DataParserAuto;
+import business.processor.mapper.MonitorMapper;
+import business.receiver.bean.MonitorBean;
 import business.receiver.threadPool.ThreadPoolService;
 import business.redis.RedisService;
 import business.sms.SmsService;
 import business.util.CRC_16;
+import business.util.CommonsUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +22,7 @@ import java.util.*;
 @Slf4j
 public class OnlineDataService {
     @Autowired
-    private IBaseDao baseDao;
+    private MonitorMapper monitorMapper;
     @Autowired
     private ReverseService reverseService;
     @Autowired
@@ -44,7 +48,7 @@ public class OnlineDataService {
         this.threadPoolService.getReceivePool().execute(() -> {
             int index = content.indexOf("MN=");
             if (index == -1) {
-                log.error("数据报文格式错误[MN错误]：" + content);
+                OnlineDataService.log.error("数据报文格式错误[MN错误]：" + content);
             } else {
                 String mn = "";
 
@@ -54,7 +58,7 @@ public class OnlineDataService {
                 }
 
                 if (mn.equals("")) {
-                    log.error("数据报文格式错误[MN错误]：" + content);
+                    OnlineDataService.log.error("数据报文格式错误[MN错误]：" + content);
                 } else {
                     String st = "";
                     int st_index = content.indexOf("ST=");
@@ -75,7 +79,7 @@ public class OnlineDataService {
                     }
 
                     if (!content.startsWith("##BeatHeart;") && (st.equals("") || cn.equals(""))) {
-                        log.error("数据报文格式错误[ST/CN错误]:" + content);
+                        OnlineDataService.log.error("数据报文格式错误[ST/CN错误]:" + content);
                     } else if (OnlineDataService.this.blackListService.isReceive(mn)) {
                         OnlineDataService.this.reverseService.setChennel(mn, ctx);
                         OnlineDataService.this.reverseService.sendLeaveCmdAfterSocketAccept(mn, ctx);
@@ -150,14 +154,15 @@ public class OnlineDataService {
         params.add(new Date());
         params.add(content);
         params.add(key);
-        return this.baseDao.sqlInsertAutoIncrementID(UpdateReceiverTableTask.getBakSourceSql_insert_auto(), params);
+        return -1;
+        //return this.baseDao.sqlInsertAutoIncrementID(UpdateReceiverTableTask.getBakSourceSql_insert_auto(), params);
     }
 
     private void receive9011(String key, String content) {
         log.info("收到设备" + key + "的反控指令接收确认回执:" + content);
         int index = content.indexOf("QN=");
         String qn = content.substring(index + 3, index + 20);
-        this.reverseService.updateReverselog(qn, key, 2, "");
+        this.reverseService.updateReverseLog(qn, key, 2, "");
     }
 
     private void receive9012(String key, String content) {
@@ -169,9 +174,9 @@ public class OnlineDataService {
             content = content.substring(index);
             String result = content.substring(7, content.indexOf("&&"));
             if (result.equals("1")) {
-                this.reverseService.updateReverselog(qn, key, 3, "");
+                this.reverseService.updateReverseLog(qn, key, 3, "");
             } else {
-                this.reverseService.updateReverselog(qn, key, 4, "");
+                this.reverseService.updateReverseLog(qn, key, 4, "");
             }
         }
 
@@ -184,7 +189,7 @@ public class OnlineDataService {
         if (index != -1) {
             content = content.substring(index);
             String result = content.substring(7, content.indexOf("&&"));
-            this.reverseService.updateReverselog(qn, key, 2, "当前瓶号:" + result);
+            this.reverseService.updateReverseLog(qn, key, 2, "当前瓶号:" + result);
         }
 
     }
@@ -197,10 +202,10 @@ public class OnlineDataService {
             content = content.substring(index);
             String result = content.substring(12, content.indexOf("&&"));
             if (result.equals("1")) {
-                this.reverseService.updateReverselog(qn, key, 3, "当前阀门状态：已关闭");
+                this.reverseService.updateReverseLog(qn, key, 3, "当前阀门状态：已关闭");
                 this.updateMonitorValveStatus(key, VALVE_STATUS_CLOSED);
             } else if (result.equals("2")) {
-                this.reverseService.updateReverselog(qn, key, 3, "当前阀门状态：已打开");
+                this.reverseService.updateReverseLog(qn, key, 3, "当前阀门状态：已打开");
                 this.updateMonitorValveStatus(key, VALVE_STATUS_OPEN);
             }
         }
@@ -214,7 +219,7 @@ public class OnlineDataService {
         if (index != -1) {
             content = content.substring(index);
             String result = content.substring(7, content.indexOf("&&"));
-            this.reverseService.updateReverselog(qn, key, 3, "当前瓶号：" + result);
+            this.reverseService.updateReverseLog(qn, key, 3, "当前瓶号：" + result);
         }
 
     }
@@ -231,7 +236,7 @@ public class OnlineDataService {
                     List<Object> params = new ArrayList();
                     params.add(valveStatus);
                     params.add(mn);
-                    this.baseDao.sqlExcute("sqlExcute mon_monitor set valve_status=? where mn=? ", params);
+                    this.monitorMapper.updateMonitorStatus("valve_status", mn,valveStatus);
                     if (valveStatus == VALVE_STATUS_OPEN && VALVE_STATE_CHANGE_TIME_CACHE.containsKey(mn)) {
                         Date lastChangeTime = (Date) VALVE_STATE_CHANGE_TIME_CACHE.get(mn);
                         if (now.getTime() - lastChangeTime.getTime() > 180000L) {

@@ -15,7 +15,7 @@ public class SysDeviceMessage {
 
     private String mn;
 
-    private String flag;
+    private String tag;
 
 
 }

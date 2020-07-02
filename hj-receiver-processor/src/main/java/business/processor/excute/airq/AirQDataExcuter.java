@@ -8,6 +8,8 @@ import business.processor.task.UpdateTableFieldTask;
 import business.receiver.bean.MonitorBean;
 import business.receiver.mapper.MyBaseMapper;
 import business.util.CommonsUtil;
+import business.util.SqlBuilder;
+import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +60,7 @@ public class AirQDataExcuter {
                 }
 
                 this.dataParserService.format(dataPacketBean, 3);
-                MonitorBean monitor = (MonitorBean)this.monitorService.getAllMonitors().get(dataPacketBean.getMn());
+                MonitorBean monitor = this.monitorService.getAllMonitors().get(dataPacketBean.getMn());
                 if (monitor != null) {
                     this.checkData(dataPacketBean, monitor);
                 }
@@ -101,10 +103,10 @@ public class AirQDataExcuter {
         StringBuilder sql_value = new StringBuilder();
         List<Object> params = new ArrayList();
         sql_field.append("INSERT INTO " + this.dataParserService.getMHDTableName(dataPacketBean) + "(ID,DATA_TIME,CREATE_TIME,MN,STATE");
-        sql_value.append(")VALUES(?,?,?,?,?");
+        sql_value.append(")VALUES({0},''{1}'',''{2}'',''{3}'',{4}");
         params.add(CommonsUtil.createUUID1());
-        params.add(dataPacketBean.getDataTime());
-        params.add(new Date());
+        params.add(DateUtil.formatDateTime(dataPacketBean.getDataTime()));
+        params.add(DateUtil.formatDateTime(new Date()));
         params.add(mn);
         params.add(0);
         double aqi = 0.0D;
@@ -121,8 +123,7 @@ public class AirQDataExcuter {
                 if (bean.getAvg() != null) {
                     avg = bean.getAvg();
                     sql_field.append("," + factorCode + "_AVG");
-                    sql_value.append(",?");
-                    params.add(avg);
+                    sql_value.append(","+avg+"");
                     double aqi_tmp = -1.0D;
                     if (factorCode.equals("A0502401")) {
                         aqi_tmp = this.airQualityService.getAQI("A05024", 1, avg);
@@ -144,8 +145,7 @@ public class AirQDataExcuter {
 
                     if (aqi_tmp >= 0.0D) {
                         sql_field.append("," + factorCode + "_IAQI");
-                        sql_value.append(",?");
-                        params.add(aqi_tmp);
+                        sql_value.append(","+aqi_tmp+"");
                         iaqi.put(factorCode, aqi_tmp);
                     }
 
@@ -163,8 +163,7 @@ public class AirQDataExcuter {
         }
 
         sql_field.append(",AQI");
-        sql_value.append(",?");
-        params.add(aqi);
+        sql_value.append(","+aqi+"");
         String level;
         if (aqi > 50.0D) {
             level = "";
@@ -172,7 +171,7 @@ public class AirQDataExcuter {
 
             while(var22.hasNext()) {
                 String code = (String)var22.next();
-                avg = (Double)iaqi.get(code);
+                avg =  iaqi.get(code);
                 if (avg == aqi) {
                     if (level.equals("")) {
                         level = code;
@@ -183,14 +182,12 @@ public class AirQDataExcuter {
             }
 
             sql_field.append(",FIRST_CODE");
-            sql_value.append(",?");
-            params.add(level);
+            sql_value.append(","+level+"");
         }
 
         level = this.airQualityService.getLevel(aqi);
         sql_field.append(",LEVEL");
-        sql_value.append(",?");
-        params.add(level);
+        sql_value.append(","+level+"");
         sql_field.append(sql_value).append(')');
         if (cn.equals("2061")) {
             WarnRuleBean warnRule = this.warnService.getEnviAirQWarnRule();
@@ -210,7 +207,7 @@ public class AirQDataExcuter {
             }
         }
         //TODO 111
-        //this.myBaseMapper.sqlExcute(sql_field.toString(), params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql_field.toString(), params));
         if (cn.equals("2061")) {
             this.monitorService.setDeviceStatus(mn, monitorDeviceStatus);
             this.monitorService.setMnCurrentLastUpload(mn);

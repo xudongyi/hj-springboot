@@ -6,7 +6,7 @@ public enum SysDeviceMessageEnum implements CodeMean {
     IS_RECIEVE("0","已接收"),
     IS_JOINQEUE("1","已加入队列"),
     IS_PARSE("2","已解析"),
-    IS_FAIL("3","解析失败");
+    IS_FAIL("7","解析失败");
     private String flag;
     private String meaning;
 

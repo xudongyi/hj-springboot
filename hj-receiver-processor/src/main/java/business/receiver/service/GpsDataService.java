@@ -5,6 +5,7 @@ import business.receiver.mapper.MyBaseMapper;
 import business.receiver.threadPool.ThreadPoolService;
 import business.util.CommonsUtil;
 import business.util.GpsConvert;
+import business.util.SqlBuilder;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,8 +161,7 @@ public class GpsDataService {
                 params.add(1);
                 params.add(distance);
             }
-
-            this.baseDao.sqlExcute(sql, params);
+            myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql,params));
         }
     }
 

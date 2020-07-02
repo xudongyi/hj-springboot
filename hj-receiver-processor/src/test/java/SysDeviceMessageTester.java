@@ -37,7 +37,7 @@ public class SysDeviceMessageTester {
             Data data = mapper.readData(content);
             sysDeviceMessage.setMn(data.getMn());
             SysDeviceMessageEnum IS_RECIEVE =  SysDeviceMessageEnum.IS_RECIEVE;
-            sysDeviceMessage.setFlag(IS_RECIEVE.code());
+            sysDeviceMessage.setTag(IS_RECIEVE.code());
             Assert.assertEquals(1,sysDeviceMessageMapper.insert(sysDeviceMessage));
         } catch (IOException e) {
             e.printStackTrace();

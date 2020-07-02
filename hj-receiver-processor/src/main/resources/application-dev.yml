@@ -116,7 +116,7 @@ spring:
         connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
       datasource:
         master:
-          url: jdbc:mysql://127.0.0.1:3306/jeecg-boot?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          url: jdbc:mysql://127.0.0.1:3306/hj?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
           username: root
           password: root
           driver-class-name: com.mysql.jdbc.Driver
@@ -160,11 +160,33 @@ hj:
     address: 127.0.0.1 #数据接收程序的ip
     port: 6000 #数据接收程序的端口号
 receive:
-  online: true
+  online:
+    online: true
+    checkCRC: true
   gps : true
   hwstore : true
+process:
+  hand:
+    counts:
+      persecond: 500
 thread:
   pool:
+    receive: 80
     process:
-      hand: 100
+      hand: 500
+      auto: 100
     reverse: 20
+sms:
+  url: http://www.baidu.com
+warn:
+  dataerror:
+    maxmin: false
+  overproof:
+    day: false
+    hour: false
+blacklist:
+  max:
+    perhour: 200
+  key: mn001,mn002,gps001
+whitelist:
+    key: mn001,mn002,gps001

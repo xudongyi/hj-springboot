@@ -22,6 +22,11 @@ public class MonitorService{
     public MonitorService() {
     }
 
+
+    public void initMonitor(){
+        List<Map<String,Object>> monitors = monitorMapper.getAllMonitor();
+    }
+
     public Map<String, MonitorBean> getAllMonitors() {
         Map<String, String> map = this.redisService.getMapAll("mn_monitor_map");
         Map<String, MonitorBean> result = new HashMap();
@@ -30,7 +35,7 @@ public class MonitorService{
 
             while(var3.hasNext()) {
                 String mn = (String)var3.next();
-                MonitorBean monitor = (MonitorBean) CommonsUtil.toJsonObject((String)map.get(mn), MonitorBean.class);
+                MonitorBean monitor = (MonitorBean) CommonsUtil.toJsonObject(map.get(mn), MonitorBean.class);
                 result.put(mn, monitor);
             }
         } else {

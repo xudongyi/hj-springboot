@@ -119,7 +119,7 @@ public class UpdateProcessorTableTask {
             String key = (String) var3.next();
             String thisMonthTable = key + thisMonth;
             String lastMonthTable = key + lastMonth;
-            if (this.myBaseMapper.checkTableExists(thisMonth) == 0) {
+            if (this.myBaseMapper.checkTableExists(thisMonthTable) == 0) {
                 if (this.myBaseMapper.checkTableExists(lastMonthTable)>0) {
                     this.myBaseMapper.sqlExcute("create table " + thisMonthTable + " like " + lastMonthTable);
                 } else {
