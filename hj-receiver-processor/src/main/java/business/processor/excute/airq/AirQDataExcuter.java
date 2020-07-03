@@ -206,7 +206,6 @@ public class AirQDataExcuter {
                 }
             }
         }
-        //TODO 111
         this.myBaseMapper.sqlExcute(sql_field.toString());
         if (cn.equals("2061")) {
             this.monitorService.setDeviceStatus(mn, monitorDeviceStatus);
