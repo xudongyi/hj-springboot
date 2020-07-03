@@ -26,8 +26,8 @@ public class AirQMessage implements BaseMessage {
         double co = DataFormat.randomData(0, 10, 2);
         double a01001 = DataFormat.randomData(15, 20, 1);
         double a01002 = DataFormat.randomData(70, 90, 1);
-        double a01007 = DataFormat.randomData(0, 7, 1);
-        double a01008 = DataFormat.randomData(90, 120, 0);
+        double a01006 = DataFormat.randomData(0, 7, 1);
+        double a01007 = DataFormat.randomData(90, 120, 0);
         this.o38List.add(o38);
         this.o31List.add(o31);
         this.noList.add(no);
@@ -47,8 +47,8 @@ public class AirQMessage implements BaseMessage {
         cmd.append("A21005-Avg=" + co + ";");
         cmd.append("A01001-Avg=" + a01001 + ";");
         cmd.append("A01002-Avg=" + a01002 + ";");
-        cmd.append("A01007-Avg=" + a01007 + ";");
-        cmd.append("A01008-Avg=" + a01008);
+        cmd.append("A01006-Avg=" + a01006 + ";");
+        cmd.append("A01007-Avg=" + a01007);
         cmd.append("&&");
         return cmd.toString();
     }

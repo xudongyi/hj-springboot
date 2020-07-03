@@ -48,7 +48,7 @@ public class AirQualityService {
                     }
                 }
 
-                AirqAQIBean maxbean = (AirqAQIBean)list.get(list.size() - 1);
+                AirqAQIBean maxbean =list.get(list.size() - 1);
                 if (aqi == -1.0D && avg > maxbean.getHighValue()) {
                     aqi = this.calcuteAQI(maxbean.getHiAqi(), maxbean.getLiAqi(), maxbean.getHighValue(), maxbean.getLowValue(), avg);
                 }
@@ -68,25 +68,25 @@ public class AirQualityService {
                 try {
                     AirqAQIBean v = new AirqAQIBean();
                     Map<String, Object> map = data.get(i);
-                    v.setCode((String)map.get("FACTOR_CODE"));
-                    if (map.get("LI_AQI") != null) {
-                        v.setLiAqi((Double)map.get("LI_AQI"));
+                    v.setCode((String)map.get("factor_code"));
+                    if (map.get("li_aqi") != null) {
+                        v.setLiAqi((Double)map.get("li_aqi"));
                     }
 
-                    if (map.get("HI_AQI") != null) {
-                        v.setHiAqi((Double)map.get("HI_AQI"));
+                    if (map.get("hi_aqi") != null) {
+                        v.setHiAqi((Double)map.get("hi_aqi"));
                     }
 
-                    if (map.get("L_VALUE") != null) {
-                        v.setLowValue((Double)map.get("L_VALUE"));
+                    if (map.get("l_value") != null) {
+                        v.setLowValue((Double)map.get("l_value"));
                     }
 
-                    if (map.get("H_VALUE") != null) {
-                        v.setHighValue((Double)map.get("H_VALUE"));
+                    if (map.get("h_value") != null) {
+                        v.setHighValue((Double)map.get("h_value"));
                     }
 
-                    if (map.get("TYPE") != null) {
-                        v.setType((Integer)map.get("TYPE"));
+                    if (map.get("type") != null) {
+                        v.setType((Integer)map.get("type"));
                     }
 
                     String key = v.getCode().toUpperCase() + "-" + v.getType();
@@ -118,7 +118,7 @@ public class AirQualityService {
 
     public String getLevel(double aqi) {
         aqi = CommonsUtil.numberFormat(aqi, 0);
-        String result = "爆表";
+        String result = "7";
         Map<String, String> map = this.redisService.getMapAll("airq_level_map");
         if (map != null && !map.isEmpty()) {
             Iterator var5 = map.keySet().iterator();
@@ -130,17 +130,17 @@ public class AirQualityService {
                     Map<String, Object> data = (Map)CommonsUtil.toJsonObject((String)map.get(level), (Class)null);
                     if (data != null) {
                         double aqi_h = 0.0D;
-                        if (data.get("AQI_H") != null) {
-                            aqi_h = Double.valueOf(String.valueOf(data.get("AQI_H")));
+                        if (data.get("aqi_h") != null) {
+                            aqi_h = Double.valueOf(String.valueOf(data.get("aqi_h")));
                         }
 
                         double aqi_l = 0.0D;
-                        if (data.get("AQI_L") != null) {
-                            aqi_l = Double.valueOf(String.valueOf(data.get("AQI_L")));
+                        if (data.get("aqi_l") != null) {
+                            aqi_l = Double.valueOf(String.valueOf(data.get("aqi_l")));
                         }
 
                         if (aqi_h >= aqi && aqi_l <= aqi) {
-                            result = (String)data.get("LEVEL");
+                            result = data.get("level")+"";
                             break;
                         }
                     }
@@ -161,7 +161,7 @@ public class AirQualityService {
         if (data != null && data.size() > 0) {
             for(int i = 0; i < data.size(); ++i) {
                 try {
-                    this.redisService.setMapValue("airq_level_map", (String)((Map)data.get(i)).get("LEVEL"), data.get(i));
+                    this.redisService.setMapValue("airq_level_map",data.get(i).get("level")+"", data.get(i));
                 } catch (Exception var4) {
                     this.log.debug("Redis提示[初始化空气质量等级]出错:" + var4.getMessage());
                 }

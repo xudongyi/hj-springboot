@@ -103,7 +103,7 @@ public class AirQDataExcuter {
         StringBuilder sql_value = new StringBuilder();
         List<Object> params = new ArrayList();
         sql_field.append("INSERT INTO " + this.dataParserService.getMHDTableName(dataPacketBean) + "(ID,DATA_TIME,CREATE_TIME,MN,STATE");
-        sql_value.append(")VALUES(''{0}'',''{1}'',''{2}'',''{3}'',{4}");
+        sql_value.append(")VALUES('"+CommonsUtil.createUUID1()+"','"+DateUtil.formatDateTime(dataPacketBean.getDataTime())+"','"+DateUtil.formatDateTime(new Date())+"','"+mn+"',0");
         params.add(CommonsUtil.createUUID1());
         params.add(DateUtil.formatDateTime(dataPacketBean.getDataTime()));
         params.add(DateUtil.formatDateTime(new Date()));
@@ -145,7 +145,7 @@ public class AirQDataExcuter {
 
                     if (aqi_tmp >= 0.0D) {
                         sql_field.append("," + factorCode + "_IAQI");
-                        sql_value.append(","+aqi_tmp+"");
+                        sql_value.append(","+aqi_tmp);
                         iaqi.put(factorCode, aqi_tmp);
                     }
 
@@ -182,7 +182,7 @@ public class AirQDataExcuter {
             }
 
             sql_field.append(",FIRST_CODE");
-            sql_value.append(","+level+"");
+            sql_value.append(",'"+level+"'");
         }
 
         level = this.airQualityService.getLevel(aqi);
@@ -207,7 +207,7 @@ public class AirQDataExcuter {
             }
         }
         //TODO 111
-        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql_field.toString(), params));
+        this.myBaseMapper.sqlExcute(sql_field.toString());
         if (cn.equals("2061")) {
             this.monitorService.setDeviceStatus(mn, monitorDeviceStatus);
             this.monitorService.setMnCurrentLastUpload(mn);
