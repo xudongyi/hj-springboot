@@ -132,35 +132,6 @@ public class NettyServer {
     }
 
     public void read(String msg, ChannelHandlerContext ctx) {
-
-        if (msg != null) {
-            int index = msg.indexOf("MN=");
-            if (index == -1) {
-                log.error("数据报文格式错误[MN错误]：" + msg);
-            } else {
-                String mn = msg.substring(index + 3, msg.indexOf(59, index));
-                if (mn.equals("")) {
-                    log.error("数据报文格式错误[MN错误]：" + msg);
-                } else {
-                    //插入数据到数据库
-                    String thisMonth = DateUtil.format(new Date(), "yyMM");
-                    String tableName = "sys_device_message_" + thisMonth;
-                    if (commonMapper.checkTableExists(tableName) == 0) {
-                        sysDeviceMessageMapper.createSysDeviceMessageTable(tableName);
-                    }
-                    SysDeviceMessage deviceMessage = new SysDeviceMessage();
-                    deviceMessage.setContent(msg);
-                    deviceMessage.setTag(SysDeviceMessageEnum.IS_RECIEVE.code());
-                    deviceMessage.setMn(mn);
-                    //动态表名设置
-                    MybatisPlusConfig.tableName.set("sys_device_message_" + DateUtil.format(new Date(), "yyMM"));
-                    int result = sysDeviceMessageMapper.insert(deviceMessage);
-                    if (result == 0) {
-                        log.error("报文插入数据库失败！");
-                    }
-                }
-            }
-        }
         try {
             if (StringUtils.isNotEmpty(msg)) {
                 if (msg.startsWith("$")) {
@@ -184,6 +155,5 @@ public class NettyServer {
         } catch (Exception var4) {
             log.error("报文接收错误[" + var4.getMessage() + "],报文：" + msg, var4);
         }
-
     }
 }

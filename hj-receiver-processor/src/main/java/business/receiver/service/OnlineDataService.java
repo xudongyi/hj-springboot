@@ -1,14 +1,21 @@
 package business.receiver.service;
 
+import business.config.MybatisPlusConfig;
 import business.processor.bean.DataPacketBean;
 import business.processor.excute.DataParserAuto;
 import business.processor.mapper.MonitorMapper;
 import business.receiver.bean.MonitorBean;
+import business.receiver.entity.SysDeviceMessage;
+import business.receiver.entity.SysDeviceMessageEnum;
+import business.receiver.mapper.MyBaseMapper;
+import business.receiver.mapper.SysDeviceMessageMapper;
+import business.receiver.task.UpdateReceiverTableTask;
 import business.receiver.threadPool.ThreadPoolService;
 import business.redis.RedisService;
 import business.sms.SmsService;
 import business.util.CRC_16;
 import business.util.CommonsUtil;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +47,12 @@ public class OnlineDataService {
     public static int VALVE_STATUS_CLOSED = 0;
     public static int VALVE_STATUS_OPEN = 1;
     public static Map<String, Date> VALVE_STATE_CHANGE_TIME_CACHE = new HashMap();
+
+    @Autowired(required = false)
+    private SysDeviceMessageMapper sysDeviceMessageMapper;
+
+    @Autowired(required = false)
+    private MyBaseMapper commonMapper;
 
     public OnlineDataService() {
     }
@@ -98,7 +111,7 @@ public class OnlineDataService {
                         }
 
                         if (content.indexOf("##BeatHeart;") == -1 && !cn.equals("9011") && !cn.equals("9012") && !cn.equals("9013") && !cn.equals("9014")) {
-                            long sourceId = OnlineDataService.this.receiveData(mn, content);
+                            String sourceId = OnlineDataService.this.receiveData(mn, content);
                             if (OnlineDataService.this.checkData(content)) {
                                 DataPacketBean dataPacketBean = new DataPacketBean();
                                 dataPacketBean.setSourceId(sourceId);
@@ -148,14 +161,24 @@ public class OnlineDataService {
         }
     }
 
-    private long receiveData(String key, String content) {
-        List<Object> params = new ArrayList();
-        params.add(1);
-        params.add(new Date());
-        params.add(content);
-        params.add(key);
-        return -1;
-        //return this.baseDao.sqlInsertAutoIncrementID(UpdateReceiverTableTask.getBakSourceSql_insert_auto(), params);
+    private String receiveData(String key, String content) {
+        //插入数据到数据库
+        String thisMonth = DateUtil.format(new Date(), "yyMM");
+        String tableName = "sys_device_message_" + thisMonth;
+        if (commonMapper.checkTableExists(tableName) == 0) {
+            sysDeviceMessageMapper.createSysDeviceMessageTable(tableName);
+        }
+        SysDeviceMessage deviceMessage = new SysDeviceMessage();
+        deviceMessage.setContent(content);
+        deviceMessage.setTag(SysDeviceMessageEnum.IS_RECIEVE.code());
+        deviceMessage.setMn(key);
+        //动态表名设置
+        MybatisPlusConfig.tableName.set("sys_device_message_" + DateUtil.format(new Date(), "yyMM"));
+        int result = sysDeviceMessageMapper.insert(deviceMessage);
+        if (result == 0) {
+            log.error("报文插入数据库失败！");
+        }
+        return  deviceMessage.getId();
     }
 
     private void receive9011(String key, String content) {

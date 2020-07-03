@@ -11,6 +11,6 @@ public interface  SysDeviceMessageMapper extends BaseMapper<SysDeviceMessage> {
     void createSysDeviceMessageTable(String tableName);
 
     /**更新tag状态**/
-    int updateTag(String tableName,long sourceId, int tag);
+    int updateTag(String tableName,String sourceId, int tag);
 
 }

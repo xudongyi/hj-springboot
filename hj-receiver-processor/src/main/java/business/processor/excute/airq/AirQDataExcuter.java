@@ -86,9 +86,9 @@ public class AirQDataExcuter {
             if (factor != null) {
                 MonitorDeviceBean device = this.monitorDeviceService.getDevice(monitorId, factorCode);
                 if (device != null) {
-                    this.warnService.checkMHDAbnormal(abnormalwarnRule, monitor, device, factor, bean, dataPacketBean.getCn());
+                    warnService.checkMHDAbnormal(abnormalwarnRule, monitor, device, factor, bean, dataPacketBean.getCn());
                     if (cn.equals("2061") && bean.getEFlag() != null) {
-                        this.monitorDeviceService.updateDeviceState(bean, monitor, device);
+                        monitorDeviceService.updateDeviceState(bean, monitor, device);
                     }
                 }
             }
@@ -102,7 +102,7 @@ public class AirQDataExcuter {
         StringBuilder sql_field = new StringBuilder();
         StringBuilder sql_value = new StringBuilder();
         List<Object> params = new ArrayList();
-        sql_field.append("INSERT INTO " + this.dataParserService.getMHDTableName(dataPacketBean) + "(ID,DATA_TIME,CREATE_TIME,MN,STATE");
+        sql_field.append("INSERT INTO " + dataParserService.getMHDTableName(dataPacketBean) + "(ID,DATA_TIME,CREATE_TIME,MN,STATE");
         sql_value.append(")VALUES('"+CommonsUtil.createUUID1()+"','"+DateUtil.formatDateTime(dataPacketBean.getDataTime())+"','"+DateUtil.formatDateTime(new Date())+"','"+mn+"',0");
         params.add(CommonsUtil.createUUID1());
         params.add(DateUtil.formatDateTime(dataPacketBean.getDataTime()));
@@ -118,7 +118,7 @@ public class AirQDataExcuter {
         double avg;
         while(var13.hasNext()) {
             String factorCode = (String)var13.next();
-            if (this.updateTableFieldTask.isFieldExist(factorCode, 3)) {
+            if (updateTableFieldTask.isFieldExist(factorCode, 3)) {
                 DataFactorBean bean = map.get(factorCode);
                 if (bean.getAvg() != null) {
                     avg = bean.getAvg();
@@ -126,21 +126,21 @@ public class AirQDataExcuter {
                     sql_value.append(","+avg+"");
                     double aqi_tmp = -1.0D;
                     if (factorCode.equals("A0502401")) {
-                        aqi_tmp = this.airQualityService.getAQI("A05024", 1, avg);
+                        aqi_tmp = airQualityService.getAQI("A05024", 1, avg);
                     } else if (factorCode.equals("A0502408")) {
-                        aqi_tmp = this.airQualityService.getAQI("A05024", 8, avg);
+                        aqi_tmp = airQualityService.getAQI("A05024", 8, avg);
                     } else if (factorCode.equals("A3400401")) {
-                        aqi_tmp = this.airQualityService.getAQI("A34004", 1, avg);
+                        aqi_tmp = airQualityService.getAQI("A34004", 1, avg);
                     } else if (factorCode.equals("A3400424")) {
-                        aqi_tmp = this.airQualityService.getAQI("A34004", 24, avg);
+                        aqi_tmp = airQualityService.getAQI("A34004", 24, avg);
                     } else if (factorCode.equals("A3400201")) {
-                        aqi_tmp = this.airQualityService.getAQI("A34002", 1, avg);
+                        aqi_tmp = airQualityService.getAQI("A34002", 1, avg);
                     } else if (factorCode.equals("A3400224")) {
-                        aqi_tmp = this.airQualityService.getAQI("A34002", 24, avg);
+                        aqi_tmp = airQualityService.getAQI("A34002", 24, avg);
                     } else if (cn.equals("2061")) {
-                        aqi_tmp = this.airQualityService.getAQI(factorCode, 1, avg);
+                        aqi_tmp = airQualityService.getAQI(factorCode, 1, avg);
                     } else {
-                        aqi_tmp = this.airQualityService.getAQI(factorCode, 24, avg);
+                        aqi_tmp = airQualityService.getAQI(factorCode, 24, avg);
                     }
 
                     if (aqi_tmp >= 0.0D) {
@@ -158,7 +158,7 @@ public class AirQDataExcuter {
                     monitorDeviceStatus = 0;
                 }
 
-                this.monitorDeviceService.setMHDData(mn, factorCode, cn, bean);
+                monitorDeviceService.setMHDData(mn, factorCode, cn, bean);
             }
         }
 
@@ -185,12 +185,12 @@ public class AirQDataExcuter {
             sql_value.append(",'"+level+"'");
         }
 
-        level = this.airQualityService.getLevel(aqi);
+        level = airQualityService.getLevel(aqi);
         sql_field.append(",LEVEL");
         sql_value.append(","+level+"");
         sql_field.append(sql_value).append(')');
         if (cn.equals("2061")) {
-            WarnRuleBean warnRule = this.warnService.getEnviAirQWarnRule();
+            WarnRuleBean warnRule = warnService.getEnviAirQWarnRule();
             if (warnRule != null) {
                 double warnLevel = warnRule.getMax();
                 double dataLevel = OnlineDataConstant.AQI_LEVEL.get(level);
@@ -199,20 +199,20 @@ public class AirQDataExcuter {
                         String warnTime = CommonsUtil.dateFormat(dataPacketBean.getDataTime(), "yyyy-MM-dd HH");
                         String warnMessage = monitor.getMonitorName() + "小时数据于" + warnTime + "时AQI报警，当前AQI值：" + aqi + "(" + OnlineDataConstant.AQI_LEVEL_DESC.get(level) + ")。";
                         //TODO 111
-                        //this.warnService.checkWarnLog(dataPacketBean.getDataTime(), warnRule, 11, warnMessage, monitor, (String)null);
+                        //warnService.checkWarnLog(dataPacketBean.getDataTime(), warnRule, 11, warnMessage, monitor, (String)null);
                     } else {
                         log.error("AQI报警失败，未找到监控点" + mn);
                     }
                 }
             }
         }
-        this.myBaseMapper.sqlExcute(sql_field.toString());
+        myBaseMapper.sqlExcute(sql_field.toString());
         if (cn.equals("2061")) {
-            this.monitorService.setDeviceStatus(mn, monitorDeviceStatus);
-            this.monitorService.setMnCurrentLastUpload(mn);
-            this.monitorService.setMnHourLastUpload(mn);
+            monitorService.setDeviceStatus(mn, monitorDeviceStatus);
+            monitorService.setMnCurrentLastUpload(mn);
+            monitorService.setMnHourLastUpload(mn);
         } else if (cn.equals("2031")) {
-            this.monitorService.setMnDayLastUpload(mn);
+            monitorService.setMnDayLastUpload(mn);
         }
 
     }

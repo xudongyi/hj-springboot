@@ -12,7 +12,7 @@
     </update>
 
     <update id="updateTag">
-        update ${tableName} set tag=${tag} where id=${sourceId}
+        update ${tableName} set tag=${tag} where id=#{sourceId}
     </update>
 
 </mapper>

@@ -7,7 +7,7 @@ import java.util.Map;
 @Data
 public class DataPacketBean {
 
-    private long sourceId;
+    private String sourceId;
     private String qn;
     private String st;
     private String cn;
