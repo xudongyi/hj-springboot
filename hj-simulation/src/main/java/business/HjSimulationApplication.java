@@ -16,7 +16,6 @@ import java.net.UnknownHostException;
 
 @Slf4j
 @SpringBootApplication
-@MapperScan("business.receiver.mapper")
 public class HjSimulationApplication {
     public static void main(String[] args) {
         SpringApplication.run(HjSimulationApplication.class, args);

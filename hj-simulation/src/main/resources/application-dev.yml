@@ -116,7 +116,7 @@ spring:
         connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
       datasource:
         master:
-          url: jdbc:mysql://127.0.0.1:3306/jeecg-boot?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
+          url: jdbc:mysql://127.0.0.1:3306/hj?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false
           username: root
           password: root
           driver-class-name: com.mysql.jdbc.Driver
@@ -157,5 +157,13 @@ mybatis-plus:
     call-setters-on-nulls: true
 hj:
   send:
+    useDb : true #使用数据库进行模拟发送
     address: 127.0.0.1 #数据发送的ip
     port: 61234 #数据发送的端口号
+  waterMN:
+  airMN:
+  airqMN:
+  surfwaterMN:
+  noiseMN:
+  vocMN:
+  ipPort: 127.0.0.1:6000

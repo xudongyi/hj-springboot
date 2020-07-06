@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * 单数据源配置（jeecg.datasource.open = false时生效）
  *
- * @Author zhoujf
+ * @Author xudy
  */
 @Configuration
 @MapperScan(value = {"business.receiver.mapper","business.processor.mapper"})

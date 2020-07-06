@@ -5,9 +5,11 @@ import business.mapper.MonitorMapper;
 import business.receiver.entity.AnalogData;
 import business.message.*;
 import business.netty.client.NettyClient;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -20,35 +22,54 @@ public class AnalogDataSendService {
     private static boolean stop = true;
     @Autowired
     private MonitorMapper monitorMapper;
+    @Value("${hj.send.useDb}")
+    private boolean useDb = false;
+    @Value("${hj.waterMN}")
+    private String waterMN;
+    @Value("${hj.airMN}")
+    private String airMN;
+    @Value("${hj.airqMN}")
+    private String airqMN;
+    @Value("${hj.surfwaterMN}")
+    private String surfwaterMN;
+    @Value("${hj.noiseMN}")
+    private String noiseMN;
+    @Value("${hj.vocMN}")
+    private String vocMN;
+    @Value("${hj.ipPort}")
+    private String ipPort="127.0.0.1:6000";
+
+
     @PostConstruct
-    public void initSend(){
+    public void initSend() {
         log.info("初始化模拟程序");
         AnalogData data = new AnalogData();
-        List<Map<String,Object>> monitors = monitorMapper.getAllMonitor();
-        List<String> waterMN = new ArrayList<>();
-        List<String> airMN = new ArrayList<>();
-        List<String> airqMN = new ArrayList<>();
-        List<String> surfwaterMN = new ArrayList<>();
-        List<String> noiseMN = new ArrayList<>();
-        List<String> vocMN = new ArrayList<>();
-        //废水，废气，VOCs，空气质量，地表水，土壤，地下水，放射源，噪声，电气
-        for(Map<String,Object> m : monitors){
-            String mn = (String) m.get("mn");
-                switch (m.get("type").toString()){
+        if (useDb) {
+            List<Map<String, Object>> monitors = monitorMapper.getAllMonitor();
+            List<String> waterMNList = new ArrayList<>();
+            List<String> airMNList = new ArrayList<>();
+            List<String> airqMNList = new ArrayList<>();
+            List<String> surfwaterMNList = new ArrayList<>();
+            List<String> noiseMNList = new ArrayList<>();
+            List<String> vocMNList = new ArrayList<>();
+            //废水，废气，VOCs，空气质量，地表水，土壤，地下水，放射源，噪声，电气
+            for (Map<String, Object> m : monitors) {
+                String mn = (String) m.get("mn");
+                switch (m.get("type").toString()) {
                     case "0"://废水
-                        waterMN.add(mn);
+                        waterMNList.add(mn);
                         break;
                     case "1"://废气
-                        airMN.add(mn);
+                        airMNList.add(mn);
                         break;
                     case "2"://VOCs
-                        vocMN.add(mn);
+                        vocMNList.add(mn);
                         break;
                     case "3"://空气质量
-                        airqMN.add(mn);
+                        airqMNList.add(mn);
                         break;
                     case "4"://地表水
-                        surfwaterMN.add(mn);
+                        surfwaterMNList.add(mn);
                         break;
                     case "5"://土壤
                         break;
@@ -57,38 +78,58 @@ public class AnalogDataSendService {
                     case "7"://放射源
                         break;
                     case "8"://噪声
-                        noiseMN.add(mn);
+                        noiseMNList.add(mn);
                         break;
                     case "9"://电气
                         break;
                 }
+            }
+            data.setWaterMN(String.join(",", waterMNList));
+            data.setIsWaterSend(String.valueOf(waterMNList.size() > 0));
+
+            data.setAirMN(String.join(",", airMNList));
+            data.setIsAirSend(String.valueOf(airMNList.size() > 0));
+
+            data.setAirqMN(String.join(",", airqMNList));
+            data.setIsAirqSend(String.valueOf(airqMNList.size() > 0));
+
+            data.setSurfwaterMN(String.join(",", surfwaterMNList));
+            data.setIsSurfwaterSend(String.valueOf(surfwaterMNList.size() > 0));
+
+            data.setNoiseMN(String.join(",", noiseMNList));
+            data.setIsNoiseSend(String.valueOf(noiseMNList.size() > 0));
+
+            data.setVocMN(String.join(",", vocMNList));
+            data.setIsVocSend(String.valueOf(vocMNList.size() > 0));
+        } else {
+            data.setWaterMN(waterMN);
+            data.setIsWaterSend(String.valueOf(waterMN.split(",").length > 0));
+
+            data.setAirMN(airMN);
+            data.setIsAirSend(String.valueOf(airMN.split(",").length > 0));
+
+            data.setAirqMN(airqMN);
+            data.setIsAirqSend(String.valueOf(airqMN.split(",").length > 0));
+
+            data.setSurfwaterMN(surfwaterMN);
+            data.setIsSurfwaterSend(String.valueOf(surfwaterMN.split(",").length > 0));
+
+            data.setNoiseMN(noiseMN);
+            data.setIsNoiseSend(String.valueOf(noiseMN.split(",").length > 0));
+
+            data.setVocMN(vocMN);
+            data.setIsVocSend(String.valueOf(vocMN.split(",").length > 0));
         }
-        data.setWaterMN(String.join(",", waterMN));
-        data.setIsWaterSend(String.valueOf(waterMN.size()>0));
-
-        data.setAirMN(String.join(",", airMN));
-        data.setIsWaterSend(String.valueOf(airMN.size()>0));
-
-        data.setAirqMN(String.join(",", airqMN));
-        data.setIsWaterSend(String.valueOf(airqMN.size()>0));
-
-        data.setSurfwaterMN(String.join(",", surfwaterMN));
-        data.setIsWaterSend(String.valueOf(surfwaterMN.size()>0));
-
-        data.setNoiseMN(String.join(",", noiseMN));
-        data.setIsWaterSend(String.valueOf(noiseMN.size()>0));
-
-        data.setVocMN(String.join(",", vocMN));
-        data.setIsWaterSend(String.valueOf(vocMN.size()>0));
-
-        data.setIpPort("127.0.0.1:6000");
+        data.setIpPort(ipPort);
         if (AnalogDataSendService.isStop()) {
             AnalogDataSendService.send(data);
         }
+
     }
 
 
     public static void send(AnalogData v) {
+        log.info("模拟程序数据参数：" + JSON.toJSONString(v));
         String ipPorts = v.getIpPort();
         if (StringUtils.isNotEmpty(ipPorts)) {
             stop = false;
