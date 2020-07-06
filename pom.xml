@@ -103,6 +103,8 @@
             <artifactId>hutool-all</artifactId>
             <version>5.3.7</version>
         </dependency>
+
+
         <!--用来解析212报文-->
         <dependency>
             <groupId>com.business.dataReceiverProcessor</groupId>

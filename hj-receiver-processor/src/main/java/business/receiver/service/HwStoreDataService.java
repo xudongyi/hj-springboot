@@ -130,7 +130,7 @@ public class HwStoreDataService {
 
     private void updateCurrentStore(Map<String, String> data, String id) {
         List<Object> params = new ArrayList();
-        String sql = "sqlExcute hh_hwstore.store_current set AMOUNT=?,UPDATE_TIME=? where ID=?";
+        String sql = "update hh_hwstore.store_current set AMOUNT=?,UPDATE_TIME=? where ID=?";
         if (data.get("TOTAL_AMOUNT") != null) {
             params.add(Double.valueOf(data.get("TOTAL_AMOUNT")));
         } else if (data.get("NEW_AMOUNT") != null) {
@@ -318,7 +318,7 @@ public class HwStoreDataService {
 
     private void updatePeriodStore(Map<String, String> data, Map<String, Object> existData) {
         List<Object> params = new ArrayList();
-        StringBuffer sql = new StringBuffer("sqlExcute hh_hwstore.store_period set ");
+        StringBuffer sql = new StringBuffer("update hh_hwstore.store_period set ");
         Double IN_AMOUNT = null;
         Double OUT_AMOUNT = null;
         Double END_AMOUNT = null;

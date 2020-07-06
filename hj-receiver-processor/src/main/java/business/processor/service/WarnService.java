@@ -5,9 +5,11 @@ import business.processor.bean.FactorBean;
 import business.processor.bean.MonitorDeviceBean;
 import business.processor.bean.WarnRuleBean;
 import business.receiver.bean.MonitorBean;
+import business.receiver.mapper.MyBaseMapper;
 import business.redis.RedisService;
 import business.sms.SmsService;
 import business.util.CommonsUtil;
+import business.util.SqlBuilder;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,8 @@ public class WarnService {
     private boolean isCheckOverproofHour = false;
     @Value("${warn.overproof.day}")
     private boolean isCheckOverproofDay = false;
-
+    @Autowired
+    private MyBaseMapper myBaseMapper;
     public WarnService() {
     }
 
@@ -415,7 +418,7 @@ public class WarnService {
 
     public void addWaterOverproof(long source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value) {
         String factorCode = currentData.getFactorCode();
-        String sql = "insert into water_current_overproof(ID,SOURCE_ID,MN,CODE,VALUE,STANDARD_VALUE,STATUS,DATA_TIME,SAMPLE_TIME)values(?,?,?,?,?,?,?,?,?)";
+        String sql = "insert into water_current_overproof(ID,SOURCE_ID,MN,CODE,VALUE,STANDARD_VALUE,STATUS,DATA_TIME,SAMPLE_TIME)values(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'',''{8}'')";
         List<Object> params = new ArrayList();
         params.add(CommonsUtil.createUUID1());
         params.add(source_id);
@@ -426,8 +429,7 @@ public class WarnService {
         params.add(currentData.getState());
         params.add(dataTime);
         params.add(currentData.getSampleTime());
-        //TODO 111
-        //this.baseDao.sqlExcute(sql, params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
     public void addAirOverproof(int tableType, long source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value, int zsFlag) {
@@ -439,7 +441,7 @@ public class WarnService {
             tableName = "voc_current_overproof";
         }
 
-        String sql = "insert into " + tableName + "(ID,SOURCE_ID,MN,CODE,STANDARD_VALUE,VALUE,STATUS,DATA_TIME)values(?,?,?,?,?,?,?,?)";
+        String sql = "insert into " + tableName + "(ID,SOURCE_ID,MN,CODE,STANDARD_VALUE,VALUE,STATUS,DATA_TIME)values(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'')";
         List<Object> params = new ArrayList();
         params.add(CommonsUtil.createUUID1());
         params.add(source_id);
@@ -455,8 +457,7 @@ public class WarnService {
         }
 
         params.add(dataTime);
-        //TODO 111
-        //this.baseDao.sqlExcute(sql, params);
+        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
     public boolean checkCurrentAbnormal(WarnRuleBean warnRule, MonitorBean monitor, MonitorDeviceBean device, FactorBean factor, DataFactorBean bean) {

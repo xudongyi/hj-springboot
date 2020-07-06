@@ -1,16 +1,92 @@
 package business.service;
 
 import business.cache.DataCache;
+import business.mapper.MonitorMapper;
 import business.receiver.entity.AnalogData;
 import business.message.*;
 import business.netty.client.NettyClient;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
+@Component
+@Slf4j
 public class AnalogDataSendService {
     private static Thread thread = null;
     private static boolean stop = true;
+    @Autowired
+    private MonitorMapper monitorMapper;
+    @PostConstruct
+    public void initSend(){
+        log.info("初始化模拟程序");
+        AnalogData data = new AnalogData();
+        List<Map<String,Object>> monitors = monitorMapper.getAllMonitor();
+        List<String> waterMN = new ArrayList<>();
+        List<String> airMN = new ArrayList<>();
+        List<String> airqMN = new ArrayList<>();
+        List<String> surfwaterMN = new ArrayList<>();
+        List<String> noiseMN = new ArrayList<>();
+        List<String> vocMN = new ArrayList<>();
+        //废水，废气，VOCs，空气质量，地表水，土壤，地下水，放射源，噪声，电气
+        for(Map<String,Object> m : monitors){
+            String mn = (String) m.get("mn");
+                switch (m.get("type").toString()){
+                    case "0"://废水
+                        waterMN.add(mn);
+                        break;
+                    case "1"://废气
+                        airMN.add(mn);
+                        break;
+                    case "2"://VOCs
+                        vocMN.add(mn);
+                        break;
+                    case "3"://空气质量
+                        airqMN.add(mn);
+                        break;
+                    case "4"://地表水
+                        surfwaterMN.add(mn);
+                        break;
+                    case "5"://土壤
+                        break;
+                    case "6"://地下水
+                        break;
+                    case "7"://放射源
+                        break;
+                    case "8"://噪声
+                        noiseMN.add(mn);
+                        break;
+                    case "9"://电气
+                        break;
+                }
+        }
+        data.setWaterMN(String.join(",", waterMN));
+        data.setIsWaterSend(String.valueOf(waterMN.size()>0));
+
+        data.setAirMN(String.join(",", airMN));
+        data.setIsWaterSend(String.valueOf(airMN.size()>0));
+
+        data.setAirqMN(String.join(",", airqMN));
+        data.setIsWaterSend(String.valueOf(airqMN.size()>0));
+
+        data.setSurfwaterMN(String.join(",", surfwaterMN));
+        data.setIsWaterSend(String.valueOf(surfwaterMN.size()>0));
+
+        data.setNoiseMN(String.join(",", noiseMN));
+        data.setIsWaterSend(String.valueOf(noiseMN.size()>0));
+
+        data.setVocMN(String.join(",", vocMN));
+        data.setIsWaterSend(String.valueOf(vocMN.size()>0));
+
+        data.setIpPort("127.0.0.1:6000");
+        if (AnalogDataSendService.isStop()) {
+            AnalogDataSendService.send(data);
+        }
+    }
+
 
     public static void send(AnalogData v) {
         String ipPorts = v.getIpPort();

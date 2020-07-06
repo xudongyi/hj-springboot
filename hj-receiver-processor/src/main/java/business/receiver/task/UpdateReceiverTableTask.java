@@ -69,6 +69,7 @@ public class UpdateReceiverTableTask {
      */
     private void excuteBakSourceTable() {
         String thisMonth = DateUtil.format(new Date(),"yyMM");
+        setBakSourceQuerySql(thisMonth);
         String tableName = "sys_device_message_" + thisMonth;
         if (commonMapper.checkTableExists(tableName)==0) {
             sysDeviceMessageMapper.createSysDeviceMessageTable(tableName);
@@ -93,11 +94,11 @@ public class UpdateReceiverTableTask {
 
     public static void setBakSourceQuerySql(String yyMM) {
         synchronized(bakSourceSql_query_hand) {
-            bakSourceSql_query_hand = "select * from sys_device_message_" + yyMM + " WHERE ID>? and TAG = 0 order by ID asc limit 0," + countLimit + "";
+            bakSourceSql_query_hand = "select * from sys_device_message_" + yyMM + " WHERE ID>''{0}'' and TAG = 0 order by ID asc limit 0," + countLimit + "";
         }
 
         synchronized(bakSourceSql_update_hand) {
-            bakSourceSql_update_hand = "sqlExcute sys_device_message_" + yyMM + " set TAG =? where ID=? ";
+            bakSourceSql_update_hand = "update sys_device_message_" + yyMM + " set TAG ={0} where ID=''{1}'' ";
         }
     }
 
