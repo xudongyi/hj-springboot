@@ -22,7 +22,7 @@ public class AnalogDataSendService {
     private static boolean stop = true;
     @Autowired
     private MonitorMapper monitorMapper;
-    @Value("${hj.send.useDb}")
+    @Value("${hj.useDb}")
     private boolean useDb = false;
     @Value("${hj.waterMN}")
     private String waterMN;

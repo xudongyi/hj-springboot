@@ -157,12 +157,12 @@ mybatis-plus:
     call-setters-on-nulls: true
 hj:
   send:
-    useDb : true #使用数据库进行模拟发送
     address: 127.0.0.1 #数据发送的ip
     port: 61234 #数据发送的端口号
+  useDb : true #使用数据库进行模拟发送
   waterMN:
   airMN:
-  airqMN:
+  airqMN: AQ130133000015,AQ130133000016
   surfwaterMN:
   noiseMN:
   vocMN:
