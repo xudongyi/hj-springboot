@@ -13,6 +13,7 @@
     <bytecodeTargetLevel>
       <module name="hj-main" target="1.8" />
       <module name="hj-parser" target="1.8" />
+      <module name="hj-server" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

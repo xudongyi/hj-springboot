@@ -54,7 +54,7 @@ public class AnalogDataSendService {
             //废水，废气，VOCs，空气质量，地表水，土壤，地下水，放射源，噪声，电气
             for (Map<String, Object> m : monitors) {
                 String mn = (String) m.get("mn");
-                switch (m.get("type").toString()) {
+                switch (m.get("site_type").toString()) {
                     case "0"://废水
                         waterMNList.add(mn);
                         break;

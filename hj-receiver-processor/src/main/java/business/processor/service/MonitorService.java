@@ -1,7 +1,9 @@
 package business.processor.service;
 
+import business.constant.TableSqlConstant;
 import business.processor.mapper.MonitorMapper;
 import business.receiver.bean.MonitorBean;
+import business.receiver.mapper.MyBaseMapper;
 import business.redis.RedisService;
 import business.util.CommonsUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.text.MessageFormat;
 import java.util.*;
 
 @Service("monitorService")
@@ -19,13 +22,17 @@ public class MonitorService{
     private RedisService redisService;
     @Autowired
     private MonitorMapper monitorMapper;
-
+    @Autowired
+    private MyBaseMapper myBaseMapper;
     public MonitorService() {
     }
 
 
     @PostConstruct
     public void initMonitor(){
+        if(myBaseMapper.checkTableExists("site_monitor_point")==0){
+            myBaseMapper.sqlExcute(TableSqlConstant.SITE_MONITOR_POINT);
+        }
         List<Map<String,Object>> monitors = monitorMapper.getAllMonitor();
         for(Map<String,Object> map : monitors){
             MonitorBean monitorBean = new MonitorBean();

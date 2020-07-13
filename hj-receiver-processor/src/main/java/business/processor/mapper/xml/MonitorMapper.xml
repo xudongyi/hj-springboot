@@ -3,9 +3,9 @@
 <mapper namespace="business.processor.mapper.MonitorMapper">
 
     <select id="getAllMonitor" resultType="java.util.HashMap">
-       select * from site_monitor_point where state=0
+       select * from site_monitor_point where site_state=1
     </select>
     <select id="getAirQMonitor" resultType="java.util.HashMap">
-       select * from site_monitor_point where state=0 and type=3
+       select * from site_monitor_point where site_state=1 and type=3
     </select>
 </mapper>

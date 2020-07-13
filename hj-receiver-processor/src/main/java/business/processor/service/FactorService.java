@@ -32,19 +32,26 @@ public class FactorService {
             FactorBean factorBean = new FactorBean();
             factorBean.setCode(factor.get("code").toString());
             factorBean.setOldCode(factor.get("old_code").toString());
+            if(factor.containsKey("error_max") && factor.get("error_max")!=null  )
             factorBean.setErrorMax(Double.parseDouble(factor.get("error_max").toString()));
+            if(factor.containsKey("error_min")&& factor.get("error_min")!=null )
             factorBean.setErrorMin(Double.parseDouble(factor.get("error_min").toString()));
             factorBean.setFactorOrder(Integer.parseInt(factor.get("sort").toString()));
             factorBean.setFactorType(Integer.parseInt(factor.get("type").toString()));
             factorBean.setFormat(factor.get("format").toString());
-            factorBean.setImpFlag(Integer.parseInt(factor.get("is_important").toString()));
+            String is_important = factor.get("is_important").toString();
+            factorBean.setImpFlag(is_important.equals("Y")?1:0);
             factorBean.setName(factor.get("meaning").toString());
             factorBean.setNote(factor.get("content").toString());
-            factorBean.setZsFlag(Integer.parseInt(factor.get("is_zs").toString()));
-            factorBean.setUseFlag(Integer.parseInt(factor.get("is_use").toString()));
+            String is_zs = factor.get("is_zs").toString();
+            factorBean.setZsFlag(is_zs.equals("Y")?1:0);
+            String is_use = factor.get("is_use").toString();
+            factorBean.setUseFlag(is_use.equals("Y")?1:0);
             factorBean.setTotalUnit(factor.get("amount_unit").toString());
-            factorBean.setSameFlag(Integer.parseInt(factor.get("is_repeat").toString()));
-            factorBean.setTotalFlag(Integer.parseInt(factor.get("is_total").toString()));
+            String is_repeat = factor.get("is_repeat").toString();
+            factorBean.setSameFlag(is_repeat.equals("Y")?1:0);
+            String is_total = factor.get("is_total").toString();
+            factorBean.setTotalFlag(is_total.equals("Y")?1:0);
             factorBean.setId(factor.get("id").toString());
             factorBean.setUnit(factor.get("chroma_unit").toString());
             if(redisFactor.containsKey(type)){
