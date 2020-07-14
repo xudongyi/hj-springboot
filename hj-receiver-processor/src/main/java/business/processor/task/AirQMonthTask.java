@@ -47,13 +47,21 @@ public class AirQMonthTask {
         Date begin = CommonsUtil.dateParse(CommonsUtil.month(0 - month), "yyyy-MM-dd");
         String endStr = DateUtil.format(end, "yyyy-MM-dd 00:00:00");
         String beginStr = DateUtil.format(begin, "yyyy-MM-dd 00:00:00");
-
+        String year = CommonsUtil.dateCurrent("yyyy");
         String lastDate = CommonsUtil.dateFormat(begin, "yyyyMM");
         if (column.equals("year")) {
             lastDate = CommonsUtil.dateFormat(begin, "yyyy");
         }
         if (column.equals("quarter")) {
-            lastDate = CommonsUtil.dateFormat(begin, "yyyyMM") + "~" + CommonsUtil.dateFormat(end, "yyyyMM");
+            if((month - 1) / 3==1){
+                lastDate = "第一季度";
+            }else if((month - 1) / 3==2){
+                lastDate = "第二季度";
+            }else if((month - 1) / 3==3){
+                lastDate = "第三季度";
+            }else if((month - 1) / 3==4){
+                lastDate = "第四季度";
+            }
         }
 
         String day_sql = "select MN,LEVEL ";
@@ -84,6 +92,10 @@ public class AirQMonthTask {
         day_sql = day_sql + " from airq_day where data_time >='" + beginStr + "' and data_time<'" + endStr + "'";
         String month_sql = "select * from " + tableName + "  where " + column + "='" + lastDate + "'";
         String insert_month_sql = "insert into " + tableName + "(ID," + column + ",CREATE_TIME,MN,FINE_DAYS,TOTAL_I,A21026_AVG,A21004_AVG,A34002_AVG,A34004_AVG,A21005_95,A05024_90,A21026_S,A21004_S,A34002_S,A34004_S,A21005_S,A05024_S,A21026_I,A21004_I,A34002_I,A34004_I,A21005_I,A05024_I)values(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'',''{8}'',''{9}'',''{10}'',''{11}'',''{12}'',''{13}'',''{14}'',''{15}'',''{16}'',''{17}'',''{18}'',''{19}'',''{20}'',''{21}'',''{22}'',''{23}'')";
+        if (column.equals("quarter")) {
+            month_sql+=" and year="+year;
+            insert_month_sql="insert into " + tableName + "(ID," + column + ",CREATE_TIME,MN,FINE_DAYS,TOTAL_I,A21026_AVG,A21004_AVG,A34002_AVG,A34004_AVG,A21005_95,A05024_90,A21026_S,A21004_S,A34002_S,A34004_S,A21005_S,A05024_S,A21026_I,A21004_I,A34002_I,A34004_I,A21005_I,A05024_I,YEAR)values(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'',''{8}'',''{9}'',''{10}'',''{11}'',''{12}'',''{13}'',''{14}'',''{15}'',''{16}'',''{17}'',''{18}'',''{19}'',''{20}'',''{21}'',''{22}'',''{23}'',''{24}'')";
+        }
         List<Object> params = new ArrayList<>();
         List<Map<String, Object>> month_data = this.myBaseMapper.sqlQuery(month_sql);
         if (month_data == null || month_data.size() == 0) {
@@ -246,6 +258,9 @@ public class AirQMonthTask {
                         params.add(pm2_5_i);
                         params.add(co_i);
                         params.add(co);
+                        if (column.equals("quarter")) {
+                            params.add(year);
+                        }
                         this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(insert_month_sql, params));
                         params = new ArrayList<>();
                     }

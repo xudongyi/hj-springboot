@@ -54,6 +54,8 @@ public class UpdateProcessorTableTask {
         allTable.put("AIRQ_HOUR", TableSqlConstant.BAK_AIRQ_HOUR_SQL);
         allTable.put("AIRQ_DAY", TableSqlConstant.BAK_AIRQ_DAY_SQL);
         allTable.put("AIRQ_MONTH", TableSqlConstant.BAK_AIRQ_MONTH_SQL);
+        allTable.put("AIRQ_QUARTER", TableSqlConstant.BAK_AIRQ_QUARTER_SQL);
+        allTable.put("AIRQ_YEAR", TableSqlConstant.BAK_AIRQ_YEAR_SQL);
         allTable.put("NOISE_HOUR", TableSqlConstant.BAK_NOISE_HOUR_SQL);
         allTable.put("NOISE_DAY", TableSqlConstant.BAK_NOISE_DAY_SQL);
         allTable.put("SURFWATER_HOUR", TableSqlConstant.BAK_SURFWATER_HOUR_SQL);
