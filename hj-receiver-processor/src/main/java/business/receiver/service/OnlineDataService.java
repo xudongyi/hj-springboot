@@ -67,7 +67,8 @@ public class OnlineDataService {
 
                 try {
                     mn = content.substring(index + 3, content.indexOf(59, index));
-                } catch (Exception var12) {
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
                 if (mn.equals("")) {
@@ -78,7 +79,8 @@ public class OnlineDataService {
                     if (st_index != -1) {
                         try {
                             st = content.substring(st_index + 3, content.indexOf(";", st_index));
-                        } catch (Exception var11) {
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -87,7 +89,8 @@ public class OnlineDataService {
                     if (cn_index != -1) {
                         try {
                             cn = content.substring(cn_index + 3, content.indexOf(";", cn_index));
-                        } catch (Exception var10) {
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 

@@ -56,7 +56,7 @@ public class WaterDataExcuter {
         if (!this.dataParserService.isExistMHDData(dataPacketBean)) {
             this.dataParserService.format(dataPacketBean, FactorType.WATER.TYPE());
             String mn = dataPacketBean.getMn();
-            MonitorBean monitor = (MonitorBean)this.monitorService.getAllMonitors().get(mn);
+            MonitorBean monitor = this.monitorService.getAllMonitors().get(mn);
             if (monitor != null) {
                 this.checkData(dataPacketBean, monitor);
                 if (dataPacketBean.getCn().equals("2061")) {
@@ -91,8 +91,8 @@ public class WaterDataExcuter {
 
         while(var7.hasNext()) {
             String factorCode = (String)var7.next();
-            DataFactorBean bean = (DataFactorBean)map.get(factorCode);
-            FactorBean factor = (FactorBean)this.factorService.getFactors(1).get(factorCode);
+            DataFactorBean bean = map.get(factorCode);
+            FactorBean factor = this.factorService.getFactors(1).get(factorCode);
             if (factor != null) {
                 MonitorDeviceBean device = this.monitorDeviceService.getDevice(monitorId, factorCode);
                 if (device != null) {
@@ -120,9 +120,9 @@ public class WaterDataExcuter {
         params.add(mn);
         Map<String, Object> monthData = this.baseDao.sqlQuery(SqlBuilder.buildSql("SELECT * FROM BAK_WATER_MONTH WHERE STATIC_TIME=''{0}'' AND MN=''{1}''", params)).get(0);
         if (monthData == null) {
-            this.insertMonthYearData(dataPacketBean, "WATER_MONTH", month);
+            this.insertMonthYearData(dataPacketBean, "WATER_MONTH", month,"yyyyMM");
         } else {
-            this.updateMonthYearData(dataPacketBean, "WATER_MONTH", monthData);
+            this.updateMonthYearData(dataPacketBean, "WATER_MONTH", monthData,"yyyyMM");
         }
 
         Date year = CommonsUtil.dateParse(CommonsUtil.dateFormat(dataTime, "yyyy"), "yyyy");
@@ -131,22 +131,22 @@ public class WaterDataExcuter {
         params.add(mn);
         Map<String, Object> yearData = this.baseDao.sqlQuery(SqlBuilder.buildSql("SELECT * FROM WATER_YEAR WHERE STATIC_TIME=''{0}'' AND MN=''{1}''", params)).get(0);
         if (yearData == null) {
-            this.insertMonthYearData(dataPacketBean, "WATER_YEAR", year);
+            this.insertMonthYearData(dataPacketBean, "WATER_YEAR", year,"yyyy");
         } else {
-            this.updateMonthYearData(dataPacketBean, "WATER_YEAR", yearData);
+            this.updateMonthYearData(dataPacketBean, "WATER_YEAR", yearData,"yyyy");
         }
 
     }
 
-    private void insertMonthYearData(DataPacketBean dataPacketBean, String tableName, Date staticTime) {
+    private void insertMonthYearData(DataPacketBean dataPacketBean, String tableName, Date staticTime,String patten) {
         StringBuilder sql_field = new StringBuilder();
         StringBuilder sql_value = new StringBuilder();
         List<Object> params = new ArrayList();
         sql_field.append("insert into " + tableName + "(ID,DATA_TIME,CREATE_TIME,STATIC_TIME,MN,TIMES");
-        sql_value.append(")VALUES(?,?,?,?,?,?");
+        sql_value.append(")VALUES(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}''");
         params.add(CommonsUtil.createUUID1());
-        params.add(dataPacketBean.getDataTime());
-        params.add(new Date());
+        params.add(CommonsUtil.dateFormat(dataPacketBean.getDataTime(),patten));
+        params.add(CommonsUtil.dateFormat(new Date()));
         params.add(staticTime);
         params.add(dataPacketBean.getMn());
         params.add(1);
@@ -156,7 +156,7 @@ public class WaterDataExcuter {
         while(var8.hasNext()) {
             String factorCode = (String)var8.next();
             if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
-                DataFactorBean bean = (DataFactorBean)map.get(factorCode);
+                DataFactorBean bean = map.get(factorCode);
                 if (bean.getMinState() != null) {
                     if (bean.getMinState() == 9) {
                         sql_field.append("," + factorCode + "_MIN");
@@ -205,18 +205,18 @@ public class WaterDataExcuter {
         this.baseDao.sqlExcute(SqlBuilder.buildSql(sql_field.toString(), params));
     }
 
-    private void updateMonthYearData(DataPacketBean dataPacketBean, String tableName, Map<String, Object> data) {
+    private void updateMonthYearData(DataPacketBean dataPacketBean, String tableName, Map<String, Object> data,String patten) {
         StringBuilder sql = new StringBuilder();
         List<Object> params = new ArrayList();
         sql.append("update " + tableName + " set TIMES=TIMES+1,DATA_TIME=''{0}''");
-        params.add(CommonsUtil.dateFormat(dataPacketBean.getDataTime(), "yyyy-MM"));
+        params.add(CommonsUtil.dateFormat(dataPacketBean.getDataTime(), patten));
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
         Iterator var7 = map.keySet().iterator();
 
         while(var7.hasNext()) {
             String factorCode = (String)var7.next();
             if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
-                DataFactorBean bean = (DataFactorBean)map.get(factorCode);
+                DataFactorBean bean = map.get(factorCode);
                 double cou;
                 Object oldCou;
                 if (bean.getMinState() != null && bean.getMinState() == 9) {
@@ -293,7 +293,7 @@ public class WaterDataExcuter {
         sql_field.append("INSERT INTO ").append(this.dataParserService.getMHDTableName(dataPacketBean)).append("(ID,DATA_TIME,CREATE_TIME,MN,STATE");
         sql_value.append(")VALUES(''{0}'',''{1}'',''{2}'',''{3}'',''{4}''");
         params.add(CommonsUtil.createUUID1());
-        params.add(dataPacketBean.getDataTime());
+        params.add(CommonsUtil.dateFormat(dataPacketBean.getDataTime()));
         params.add(CommonsUtil.dateFormat(new Date()));
         params.add(mn);
         params.add(0);
@@ -303,7 +303,7 @@ public class WaterDataExcuter {
         while(var8.hasNext()) {
             String factorCode = (String)var8.next();
             if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
-                DataFactorBean bean = (DataFactorBean)map.get(factorCode);
+                DataFactorBean bean = map.get(factorCode);
                 sql_field.append("," + factorCode + "_MIN");
                 sql_field.append("," + factorCode + "_MIN_STATE");
                 sql_field.append("," + factorCode + "_MAX");
