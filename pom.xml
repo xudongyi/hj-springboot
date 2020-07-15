@@ -105,7 +105,7 @@
         </dependency>
 
 
-        <!--用来解析212报文-->
+     <!--   &lt;!&ndash;用来解析212报文&ndash;&gt;
         <dependency>
             <groupId>com.business.dataReceiverProcessor</groupId>
             <artifactId>dataReceiverProcessor2.0</artifactId>
@@ -114,13 +114,13 @@
             <systemPath>${project.basedir}/third-libs/dataReceiverProcessor2.0.jar</systemPath>
         </dependency>
 
-        <!--用来解析212报文-->
+        &lt;!&ndash;用来解析212报文&ndash;&gt;
         <dependency>
             <groupId>com.business.dataSendSocketDemo</groupId>
             <artifactId>dataSendSocketDemo</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/third-libs/dataSendSocketDemo.jar</systemPath>
-        </dependency>
+        </dependency>-->
     </dependencies>
 </project>

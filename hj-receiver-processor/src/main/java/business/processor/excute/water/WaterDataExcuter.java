@@ -155,7 +155,7 @@ public class WaterDataExcuter {
 
         while(var8.hasNext()) {
             String factorCode = (String)var8.next();
-            if (this.updateTableFieldTask.isFieldExist(factorCode, 1)) {
+            if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
                 DataFactorBean bean = (DataFactorBean)map.get(factorCode);
                 if (bean.getMinState() != null) {
                     if (bean.getMinState() == 9) {
@@ -215,7 +215,7 @@ public class WaterDataExcuter {
 
         while(var7.hasNext()) {
             String factorCode = (String)var7.next();
-            if (this.updateTableFieldTask.isFieldExist(factorCode, 1)) {
+            if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
                 DataFactorBean bean = (DataFactorBean)map.get(factorCode);
                 double cou;
                 Object oldCou;
@@ -294,7 +294,7 @@ public class WaterDataExcuter {
         sql_value.append(")VALUES(''{0}'',''{1}'',''{2}'',''{3}'',''{4}''");
         params.add(CommonsUtil.createUUID1());
         params.add(dataPacketBean.getDataTime());
-        params.add(new Date());
+        params.add(CommonsUtil.dateFormat(new Date()));
         params.add(mn);
         params.add(0);
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
@@ -302,7 +302,7 @@ public class WaterDataExcuter {
 
         while(var8.hasNext()) {
             String factorCode = (String)var8.next();
-            if (this.updateTableFieldTask.isFieldExist(factorCode, 1)) {
+            if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
                 DataFactorBean bean = (DataFactorBean)map.get(factorCode);
                 sql_field.append("," + factorCode + "_MIN");
                 sql_field.append("," + factorCode + "_MIN_STATE");
