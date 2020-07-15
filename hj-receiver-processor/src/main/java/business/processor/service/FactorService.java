@@ -4,6 +4,7 @@ import business.processor.bean.FactorBean;
 import business.processor.mapper.PollutionCodeMapper;
 import business.redis.RedisService;
 import business.util.CommonsUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,9 @@ public class FactorService {
             FactorBean factorBean = new FactorBean();
             factorBean.setCode(factor.get("code").toString());
             factorBean.setOldCode(factor.get("old_code").toString());
-            if(factor.containsKey("error_max") && factor.get("error_max")!=null  )
+            if(StringUtils.isNotEmpty((String)factor.get("error_max")))
             factorBean.setErrorMax(Double.parseDouble(factor.get("error_max").toString()));
-            if(factor.containsKey("error_min")&& factor.get("error_min")!=null )
+            if(StringUtils.isNotEmpty((String)factor.get("error_min")))
             factorBean.setErrorMin(Double.parseDouble(factor.get("error_min").toString()));
             factorBean.setFactorOrder(Integer.parseInt(factor.get("sort").toString()));
             factorBean.setFactorType(Integer.parseInt(factor.get("type").toString()));

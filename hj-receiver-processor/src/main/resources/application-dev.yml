@@ -170,6 +170,11 @@ process:
     open : false
     counts:
       persecond: 500
+data:
+  bak:
+    xml:
+      open: false
+      dir : D:\\xml\\
 thread:
   pool:
     receive: 80

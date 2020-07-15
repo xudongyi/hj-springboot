@@ -3,7 +3,7 @@
 <mapper namespace="business.processor.mapper.PollutionCodeMapper">
 
     <select id="getAllCodes" resultType="java.util.HashMap">
-       select * from sys_pollution_code where is_use=0
+       select * from sys_pollution_code where is_use='Y'
     </select>
 
 </mapper>

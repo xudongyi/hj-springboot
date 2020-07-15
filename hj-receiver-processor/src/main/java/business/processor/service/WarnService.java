@@ -1,5 +1,6 @@
 package business.processor.service;
 
+import business.ienum.FactorType;
 import business.processor.bean.DataFactorBean;
 import business.processor.bean.FactorBean;
 import business.processor.bean.MonitorDeviceBean;
@@ -416,7 +417,7 @@ public class WarnService {
         //this.baseDao.sqlExcute(sql, params);
     }
 
-    public void addWaterOverproof(long source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value) {
+    public void addWaterOverproof(String source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value) {
         String factorCode = currentData.getFactorCode();
         String sql = "insert into water_current_overproof(ID,SOURCE_ID,MN,CODE,VALUE,STANDARD_VALUE,STATUS,DATA_TIME,SAMPLE_TIME)values(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'',''{8}'')";
         List<Object> params = new ArrayList();
@@ -432,7 +433,7 @@ public class WarnService {
         this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
     }
 
-    public void addAirOverproof(int tableType, long source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value, int zsFlag) {
+    public void addAirOverproof(int tableType, String source_id, String mn, Date dataTime, DataFactorBean currentData, double standard_value, int zsFlag) {
         String factorCode = currentData.getFactorCode();
         String tableName = "";
         if (tableType == 2) {
@@ -503,7 +504,7 @@ public class WarnService {
         }
     }
 
-    public boolean checkOverproof(long sourceId, MonitorBean monitor, DataFactorBean bean, FactorBean factor, boolean isAbnormal) {
+    public boolean checkOverproof(String sourceId, MonitorBean monitor, DataFactorBean bean, FactorBean factor, boolean isAbnormal) {
         int result = 9;
         Double val = null;
         String warn_value = "";
@@ -560,11 +561,11 @@ public class WarnService {
             if (result == 9) {
                 return true;
             } else {
-                if (factorType == 1) {
+                if (factorType == FactorType.WATER.TYPE()) {
                     this.addWaterOverproof(sourceId, mn, dataTime, bean, warnSt);
-                } else if (factorType == 2) {
+                } else if (factorType == FactorType.AIR.TYPE()) {
                     this.addAirOverproof(factorType, sourceId, mn, dataTime, bean, warnSt, factor.getZsFlag());
-                } else if (factorType == 9) {
+                } else if (factorType == FactorType.ELECTRIC.TYPE()) {
                     this.addAirOverproof(factorType, sourceId, mn, dataTime, bean, warnSt, factor.getZsFlag());
                 }
                 //TODO 111

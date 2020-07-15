@@ -1,5 +1,6 @@
 package business.processor.task;
 
+import business.ienum.FactorType;
 import business.processor.mapper.MonitorMapper;
 import business.receiver.mapper.MyBaseMapper;
 import business.util.CommonsUtil;
@@ -42,7 +43,7 @@ public class AirQMonthTask {
     }
 
     private void saveData(int month, String tableName, String column) {
-        int factorType = 3;
+        int factorType = FactorType.AIRQ.TYPE();
         Date end = CommonsUtil.dateParse(CommonsUtil.dateCurrent("yyyy-MM-dd"), "yyyy-MM-dd");
         Date begin = CommonsUtil.dateParse(CommonsUtil.month(0 - month), "yyyy-MM-dd");
         String endStr = DateUtil.format(end, "yyyy-MM-dd 00:00:00");

@@ -1,6 +1,7 @@
 package business.processor.excute.airq;
 
 import business.constant.OnlineDataConstant;
+import business.ienum.FactorType;
 import business.processor.bean.*;
 import business.processor.excute.DataParserService;
 import business.processor.service.*;
@@ -59,7 +60,7 @@ public class AirQDataExcuter {
                     dataPacketBean.setContent(dataPacketBean.getContent().replaceAll("A34002-", "A3400224-").replaceAll("a34002-", "A3400224-").replaceAll("A34004-", "A3400424-").replaceAll("a34004-", "A3400424-"));
                 }
 
-                this.dataParserService.format(dataPacketBean, 3);
+                this.dataParserService.format(dataPacketBean, FactorType.AIRQ.TYPE());
                 MonitorBean monitor = this.monitorService.getAllMonitors().get(dataPacketBean.getMn());
                 if (monitor != null) {
                     this.checkData(dataPacketBean, monitor);

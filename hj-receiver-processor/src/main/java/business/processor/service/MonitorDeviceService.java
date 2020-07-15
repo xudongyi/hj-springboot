@@ -3,7 +3,7 @@ package business.processor.service;
 import business.processor.bean.DataFactorBean;
 import business.processor.bean.MonitorDeviceBean;
 import business.processor.bean.WarnRuleBean;
-import business.processor.mapper.MonitorMapper;
+import business.processor.mapper.MonitorDeviceMapper;
 import business.receiver.bean.MonitorBean;
 import business.receiver.mapper.MyBaseMapper;
 import business.redis.RedisService;
@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service("monitorDeviceService")
@@ -25,8 +26,46 @@ public class MonitorDeviceService {
     private WarnService warnService;
     @Autowired
     private MyBaseMapper myBaseMapper;
+    @Autowired
+    private MonitorDeviceMapper monitorDeviceMapper;
 
     public MonitorDeviceService() {
+    }
+
+    @PostConstruct
+    public void initDevice() {
+        List<Map<String,Object>> devices = monitorDeviceMapper.getAllMonitorDevice();
+        Map<String,List<MonitorDeviceBean>> monitorDeviceMap = new HashMap<>();
+        for(Map<String,Object> device : devices){
+            String monitorId = device.get("monitor_id").toString();
+            MonitorDeviceBean bean = new MonitorDeviceBean();
+            bean.setMonitorId(monitorId);
+            bean.setDeviceId((String)device.get("id"));
+            bean.setDeviceName((String)device.get("device_name"));
+            bean.setFactorCode((String)device.get("pollution_code"));
+            if(StringUtils.isNotEmpty((String)device.get("range_max")))
+                bean.setNormalMax(Double.parseDouble((String)device.get("range_max")));
+            if(StringUtils.isNotEmpty((String)device.get("range_min")))
+                bean.setNormalMin(Double.parseDouble((String)device.get("range_min")));
+            if(StringUtils.isNotEmpty((String)device.get("sample_cycle")))
+                bean.setWorkCycle(Integer.parseInt((String)device.get("sample_cycle")));
+            List<MonitorDeviceBean> monitorDeviceBeans = monitorDeviceMap.get(monitorId);
+            if(monitorDeviceBeans==null){
+                monitorDeviceBeans = new ArrayList<>();
+                monitorDeviceBeans.add(bean);
+                monitorDeviceMap.put(monitorId,monitorDeviceBeans);
+            }else{
+                monitorDeviceBeans.add(bean);
+            }
+        }
+        for(String key : monitorDeviceMap.keySet()){
+            List<MonitorDeviceBean> monitorDeviceBeans = monitorDeviceMap.get(key);
+            setDevice(key,monitorDeviceBeans);
+        }
+    }
+
+    public void setDevice(String monitorId, List<MonitorDeviceBean> devices) {
+        this.redisService.setMapValue("monitor_device_map", monitorId, devices);
     }
 
     public MonitorDeviceBean getDevice(String monitorId, String factorCode) {
@@ -130,9 +169,9 @@ public class MonitorDeviceService {
 
     public Map<String, String> getDeviceStatusDic() {
         Map<String, String> map = new HashMap();
-        map.put("0","故障");
-        map.put("1","维修");
-        map.put("2","停运");
+        map.put("0", "故障");
+        map.put("1", "维修");
+        map.put("2", "停运");
         return map;
     }
 
@@ -178,7 +217,7 @@ public class MonitorDeviceService {
             params.add(bean.getSampleTime());
             params.add(Integer.valueOf(thisState));
             sql = "INSERT INTO DEVICE_STATE(ID,MN,CODE,DATA_TIME,CREATE_TIME,END_TIME,SAMPLE_TIME,STATE) VALUES({0},''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'')";
-            this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql,params));
+            this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
         }
 
         if (!thisState.equals("0")) {

@@ -8,6 +8,9 @@ import business.processor.bean.DataFactorBean;
 import business.processor.bean.DataPacketBean;
 import business.processor.bean.FactorBean;
 import business.processor.excute.airq.AirQDataExcuter;
+import business.processor.excute.water.TianzeSurplusExcuter;
+import business.processor.excute.water.WaterCurrentExcuter;
+import business.processor.excute.water.WaterDataExcuter;
 import business.processor.service.FactorService;
 import business.processor.task.UpdateTableFieldTask;
 import business.receiver.mapper.MyBaseMapper;
@@ -22,6 +25,12 @@ import org.springframework.stereotype.Service;
 @Service("dataParserService")
 @Slf4j
 public class DataParserService {
+    @Autowired
+    private WaterCurrentExcuter waterCurrentExcuter;
+    @Autowired
+    private WaterDataExcuter waterDataExcuter;
+    @Autowired
+    private TianzeSurplusExcuter tianzeSurplusExcuter;
     @Autowired
     private AirQDataExcuter airQDataExcuter;
     @Autowired
@@ -239,11 +248,21 @@ public class DataParserService {
             log.error("报文解析错误[DataTime错误],报文:" + msg);
         } else {
             dataPacketBean.setDataTime(dataTime);
-
             try {
                 if (!cn.equals("3015") && !cn.equals("8804") && !cn.equals("8803") && !cn.equals("3715")) {
                     tag = 6;
-                    if (st.equals("22")) {
+                    if (st.equals("32")) {
+                        if (cn.equals("2011")) {
+                            tag = this.waterCurrentExcuter.execute(dataPacketBean);
+                        } else if (!cn.equals("2051") && !cn.equals("2061") && !cn.equals("2031")) {
+                            if (cn.equals("4013")) {
+                                tag = this.tianzeSurplusExcuter.execute(dataPacketBean);
+                            }
+                        } else {
+                            tag = this.waterDataExcuter.execute(dataPacketBean);
+                        }
+                    }
+                    else if (st.equals("22")) {
                         if (cn.equals("2061") || cn.equals("2031")) {
                             tag = this.airQDataExcuter.execute(dataPacketBean);
                         }
