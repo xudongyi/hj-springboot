@@ -14,7 +14,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.36.Final</version>
+            <version>4.1.42.Final</version>
         </dependency>
     </dependencies>
     <!--多模块打包：只需在启动类所在模块的POM文件：指定打包插件 -->
