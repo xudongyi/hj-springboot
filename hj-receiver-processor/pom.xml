@@ -23,13 +23,13 @@
         </dependency>
 
         <!--用来解析212报文-->
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.xiaoyao9184</groupId>
             <artifactId>hj-t212-parser</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/../third-libs/hj-t212-parser.jar</systemPath>
-        </dependency>
+        </dependency>-->
     </dependencies>
     <!--多模块打包：只需在启动类所在模块的POM文件：指定打包插件 -->
     <build>
