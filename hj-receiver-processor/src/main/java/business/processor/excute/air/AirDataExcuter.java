@@ -391,7 +391,7 @@ public class AirDataExcuter {
                 sql_value.append(","+bean.getAvgState());
                 sql_value.append(","+bean.getCou());
                 sql_value.append(","+bean.getCouState());
-                sql_value.append(","+bean.getFlag()==null?"'"+bean.getFlag()+"'":null);
+                sql_value.append(",'"+bean.getFlag()+"'");
                 sql_field.append("," + factorCode + "_ZSMIN");
                 sql_field.append("," + factorCode + "_ZSMIN_STATE");
                 sql_field.append("," + factorCode + "_ZSMAX");

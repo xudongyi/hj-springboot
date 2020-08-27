@@ -22,7 +22,6 @@ import java.util.*;
 
 @Component
 @Slf4j
-@Transactional
 public class DataParserHandTask {
     public static String bakSourceDataId = "";
     @Autowired
@@ -106,7 +105,7 @@ public class DataParserHandTask {
                     }
 
                     if (!toExcute.isEmpty()) {
-                        log.info(CommonsUtil.dateCurrent() + "开始解析:" + ((Map)list.get(0)).get("ID") + "—" + ((Map)list.get(list.size() - 1)).get("ID") + "，共" + list.size() + "条记录");
+                        log.info(CommonsUtil.dateCurrent() + "开始解析:" + ((Map)list.get(0)).get("id") + "—" + ((Map)list.get(list.size() - 1)).get("id") + "，共" + list.size() + "条记录");
                     }
 
                     Iterator var18 = toExcute.iterator();
