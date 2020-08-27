@@ -1,5 +1,6 @@
 package business.processor.excute.water;
 
+import business.constant.OnlineDataConstant;
 import business.ienum.FactorType;
 import business.processor.bean.*;
 import business.processor.excute.DataParserService;
@@ -440,14 +441,8 @@ public class WaterCurrentExcuter {
         String mn = dataPacketBean.getMn();
         StringBuffer sql_field = new StringBuffer();
         StringBuffer sql_value = new StringBuffer();
-        List<Object> params = new ArrayList();
         sql_field.append("INSERT INTO WATER_CURRENT_TR_" + CommonsUtil.dateFormat(dataTime, "yyMM") + "(ID,DATA_TIME,CREATE_TIME,MN,STATE");
-        sql_value.append(") VALUES(''{0}'',''{1}'',''{2}'',''{3}'',''{4}''");
-        params.add(CommonsUtil.createUUID1());
-        params.add(CommonsUtil.dateFormat(dataTime));
-        params.add(CommonsUtil.dateFormat(new Date()));
-        params.add(mn);
-        params.add(0);
+        sql_value.append(") VALUES('"+CommonsUtil.createUUID1()+"','"+CommonsUtil.dateFormat(dataTime)+"','"+CommonsUtil.dateFormat(new Date())+"','"+mn+"',0");
         int monitorDataStatus = 9;
         int monitorDeviceStatus = 1;
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
@@ -455,7 +450,7 @@ public class WaterCurrentExcuter {
 
         while(var10.hasNext()) {
             String factorCode = (String)var10.next();
-            if (this.updateTableFieldTask.isFieldExist(factorCode, 1)) {
+            if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
                 DataFactorBean bean = (DataFactorBean)map.get(factorCode);
                 if (bean.getRtd() != null) {
                     sql_field.append("," + factorCode + "_RTD");
@@ -512,7 +507,7 @@ public class WaterCurrentExcuter {
         }
 
         sql_field.append(sql_value).append(')');
-        this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql_field.toString(), params));
+        this.myBaseMapper.sqlExcute(sql_field.toString());
         this.monitorService.setDataStatus(mn, monitorDataStatus);
         this.monitorService.setDeviceStatus(mn, monitorDeviceStatus);
     }

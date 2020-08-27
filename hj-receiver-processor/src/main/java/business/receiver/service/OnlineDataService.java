@@ -133,6 +133,9 @@ public class OnlineDataService {
     }
 
     public boolean checkData(String content) {
+        if(content==null){
+            return false;
+        }
         if (!this.checkCRC) {
             return true;
         } else if (content.length() < 10) {

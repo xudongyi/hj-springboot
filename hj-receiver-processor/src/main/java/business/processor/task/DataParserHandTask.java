@@ -9,6 +9,7 @@ import business.receiver.task.UpdateReceiverTableTask;
 import business.receiver.threadPool.ThreadPoolService;
 import business.util.CommonsUtil;
 import business.util.SqlBuilder;
+import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,8 +65,8 @@ public class DataParserHandTask {
 
                     for(int i = 0; i < list.size(); ++i) {
                         Map<String, Object> map = (Map)list.get(i);
-                        String content = (String)map.get("CONTEXT");
-                        String id = (String)map.get("ID");
+                        String content = (String)map.get("content");
+                        String id = (String)map.get("id");
                         bakSourceDataId = id;
                         boolean isValid = true;
                         if (!this.onlineDataService.checkData(content)) {
@@ -103,7 +104,7 @@ public class DataParserHandTask {
                     }
 
                     if (!toExcute.isEmpty()) {
-                        System.out.println(CommonsUtil.dateCurrent() + "开始解析:" + ((Map)list.get(0)).get("ID") + "—" + ((Map)list.get(list.size() - 1)).get("ID") + "，共" + list.size() + "条记录");
+                        log.info(CommonsUtil.dateCurrent() + "开始解析:" + ((Map)list.get(0)).get("ID") + "—" + ((Map)list.get(list.size() - 1)).get("ID") + "，共" + list.size() + "条记录");
                     }
 
                     Iterator var18 = toExcute.iterator();
@@ -123,7 +124,7 @@ public class DataParserHandTask {
                         final String id = (String)var18.next();
                         this.threadPoolService.getHandProcessPool().execute(new Runnable() {
                             public void run() {
-                                DataParserHandTask.this.sysDeviceMessageMapper.updateTag(UpdateReceiverTableTask.getBakSourceSql_update_hand(), id, 8);
+                                DataParserHandTask.this.sysDeviceMessageMapper.updateTag("sys_device_message_" + DateUtil.format(new Date(), "yyMM"), id, 8);
                             }
                         });
                     }

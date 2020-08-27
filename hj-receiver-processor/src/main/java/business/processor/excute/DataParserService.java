@@ -183,8 +183,8 @@ public class DataParserService {
 
                                 dataFactorBean.setSampleTime(sampleTime);
                             }
-                        } catch (Exception var32) {
-                            log.error("报文拆分转换出错，数值异常[" + var32.getMessage() + "],报文内容：" + msg);
+                        } catch (Exception e) {
+                            log.error("报文拆分转换出错，数值异常[" + e.getMessage() + "],报文内容：" + msg);
                         }
                     }
                 }
@@ -215,6 +215,7 @@ public class DataParserService {
                 if (dataFactorBean.getZsCou() == null && dataFactorBean.getCou() != null) {
                     dataFactorBean.setZsCou(dataFactorBean.getCou());
                 }
+                dataFactorBean.setRepeat(false);
 
                 if (StringUtils.isNotEmpty(factorCode) && this.updateTableFieldTask.isFactorValid(factorCode, factorType)) {
                     dataMap.put(factorCode, dataFactorBean);
@@ -277,7 +278,7 @@ public class DataParserService {
         }
         this.sysDeviceMessageMapper.updateTag("sys_device_message_" + DateUtil.format(new Date(), "yyMM"), dataPacketBean.getSourceId(), tag);
         if (showlog) {
-            System.out.println("报文解析完成【" + dataPacketBean.getSourceId() + "】" + "TAG=" + tag);
+            log.info("报文解析完成【" + dataPacketBean.getSourceId() + "】" + "TAG=" + tag);
         }
 
     }

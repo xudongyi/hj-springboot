@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 public class OnlineDataConstant {
-    public static final int FACTOR_TYPE_WATER = 1;
-    public static final int FACTOR_TYPE_AIR = 2;
+    public static final int FACTOR_TYPE_WATER = 0;
+    public static final int FACTOR_TYPE_AIR = 1;
+    public static final int FACTOR_TYPE_VOC = 2;
     public static final int FACTOR_TYPE_AIRQ = 3;
-    public static final int FACTOR_TYPE_RAD = 4;
-    public static final int FACTOR_TYPE_SURFWATER = 5;
+    public static final int FACTOR_TYPE_SURFWATER = 4;
+    public static final int FACTOR_TYPE_RAD = 5;
     public static final int FACTOR_TYPE_OIL = 6;
     public static final int FACTOR_TYPE_NOISE = 7;
     public static final int FACTOR_TYPE_INCINERATOR = 8;
-    public static final int FACTOR_TYPE_VOC = 9;
     public static final int DATA_PARSER_CODE_DEFAULT = 0;
     public static final int DATA_PARSER_CODE_DOING = 1;
     public static final int DATA_PARSER_CODE_OK = 2;

@@ -45,7 +45,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx)  {
-        System.out.println(ctx.channel().localAddress().toString() + " 通道不活跃！");
+        log.info(ctx.channel().localAddress().toString() + " 通道不活跃！");
         removeChannnelMap(ctx);
         // 关闭流
         ctx.close();

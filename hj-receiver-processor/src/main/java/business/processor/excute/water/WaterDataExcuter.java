@@ -10,7 +10,6 @@ import business.receiver.mapper.MyBaseMapper;
 import business.util.CommonsUtil;
 import business.util.MathCalcUtil;
 import business.util.SqlBuilder;
-import cn.hutool.core.date.DatePattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +19,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.text.DateFormat;
 import java.util.*;
 
 @Service("waterDataExcuter")
@@ -141,15 +139,8 @@ public class WaterDataExcuter {
     private void insertMonthYearData(DataPacketBean dataPacketBean, String tableName, Date staticTime,String patten) {
         StringBuilder sql_field = new StringBuilder();
         StringBuilder sql_value = new StringBuilder();
-        List<Object> params = new ArrayList();
         sql_field.append("insert into " + tableName + "(ID,DATA_TIME,CREATE_TIME,STATIC_TIME,MN,TIMES");
-        sql_value.append(")VALUES(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}''");
-        params.add(CommonsUtil.createUUID1());
-        params.add(CommonsUtil.dateFormat(dataPacketBean.getDataTime(),patten));
-        params.add(CommonsUtil.dateFormat(new Date()));
-        params.add(staticTime);
-        params.add(dataPacketBean.getMn());
-        params.add(1);
+        sql_value.append(") VALUES('"+CommonsUtil.createUUID1()+"','"+CommonsUtil.dateFormat(dataPacketBean.getDataTime())+"','"+CommonsUtil.dateFormat(new Date())+"','"+staticTime+"','"+dataPacketBean.getMn()+"',0");
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
         Iterator var8 = map.keySet().iterator();
 
@@ -160,13 +151,11 @@ public class WaterDataExcuter {
                 if (bean.getMinState() != null) {
                     if (bean.getMinState() == 9) {
                         sql_field.append("," + factorCode + "_MIN");
-                        params.add(bean.getMin());
-                        sql_value.append(",?");
+                        sql_value.append(","+bean.getMin()+"");
                     }
 
                     sql_field.append("," + factorCode + "_MIN_STATE");
-                    params.add(bean.getMinState());
-                    sql_value.append(",?");
+                    sql_value.append(","+bean.getMinState()+"");
                 }
 
                 if (bean.getMaxState() != null) {
@@ -202,17 +191,14 @@ public class WaterDataExcuter {
         }
 
         sql_field.append(sql_value).append(')');
-        this.baseDao.sqlExcute(SqlBuilder.buildSql(sql_field.toString(), params));
+        this.baseDao.sqlExcute(sql_field.toString());
     }
 
     private void updateMonthYearData(DataPacketBean dataPacketBean, String tableName, Map<String, Object> data,String patten) {
         StringBuilder sql = new StringBuilder();
-        List<Object> params = new ArrayList();
-        sql.append("update " + tableName + " set TIMES=TIMES+1,DATA_TIME=''{0}''");
-        params.add(CommonsUtil.dateFormat(dataPacketBean.getDataTime(), patten));
+        sql.append("update " + tableName + " set TIMES=TIMES+1,DATA_TIME='"+CommonsUtil.dateFormat(dataPacketBean.getDataTime(), patten)+"'");
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
         Iterator var7 = map.keySet().iterator();
-
         while(var7.hasNext()) {
             String factorCode = (String)var7.next();
             if (this.updateTableFieldTask.isFieldExist(factorCode, FactorType.WATER.TYPE())) {
@@ -227,12 +213,10 @@ public class WaterDataExcuter {
                             cou = (Double)oldCou;
                         }
                     } else {
-                        sql.append(',').append(factorCode).append("_MIN_STATE").append("=?");
-                        params.add(bean.getMinState());
+                        sql.append(',').append(factorCode).append("_MIN_STATE").append("="+bean.getMinState()+"");
                     }
 
-                    sql.append("," + factorCode + "_MIN").append("=?");
-                    params.add(cou);
+                    sql.append("," + factorCode + "_MIN").append("="+cou+"");
                 }
 
                 if (bean.getMaxState() != null && bean.getMaxState() == 9) {
@@ -257,11 +241,9 @@ public class WaterDataExcuter {
                         avg = MathCalcUtil.avg((Double)oldAvg, bean.getAvg(), times);
                     } else {
                         sql.append("," + factorCode + "_AVG_STATE").append("='"+bean.getAvgState()+"'");
-                        params.add(bean.getAvgState());
                     }
 
                     sql.append("," + factorCode + "_AVG").append("='"+avg+"'");
-                    params.add(avg);
                 }
 
                 if (bean.getCouState() != null && bean.getCouState() == 9) {
@@ -271,7 +253,6 @@ public class WaterDataExcuter {
                         cou = CommonsUtil.numberFormat(bean.getCou() + (Double)oldCou, 4);
                     } else {
                         sql.append("," + factorCode + "_COU_STATE").append("='"+bean.getCouState()+"'");
-                        params.add(bean.getCouState());
                     }
 
                     sql.append("," + factorCode + "_COU").append("='"+cou+"'");
@@ -279,9 +260,8 @@ public class WaterDataExcuter {
             }
         }
 
-        sql.append(" WHERE ID=''{1}'' ");
-        params.add(data.get("ID"));
-        this.baseDao.sqlExcute(SqlBuilder.buildSql(sql.toString(), params));
+        sql.append(" WHERE ID='"+data.get("ID")+"' ");
+        this.baseDao.sqlExcute(sql.toString());
     }
 
     private void saveData(DataPacketBean dataPacketBean) {
@@ -289,14 +269,8 @@ public class WaterDataExcuter {
         String mn = dataPacketBean.getMn();
         StringBuilder sql_field = new StringBuilder();
         StringBuilder sql_value = new StringBuilder();
-        List<Object> params = new ArrayList();
         sql_field.append("INSERT INTO ").append(this.dataParserService.getMHDTableName(dataPacketBean)).append("(ID,DATA_TIME,CREATE_TIME,MN,STATE");
-        sql_value.append(")VALUES(''{0}'',''{1}'',''{2}'',''{3}'',''{4}''");
-        params.add(CommonsUtil.createUUID1());
-        params.add(CommonsUtil.dateFormat(dataPacketBean.getDataTime()));
-        params.add(CommonsUtil.dateFormat(new Date()));
-        params.add(mn);
-        params.add(0);
+        sql_value.append(") VALUES('"+CommonsUtil.createUUID1()+"','"+CommonsUtil.dateFormat(dataPacketBean.getDataTime())+"','"+CommonsUtil.dateFormat(new Date())+"','"+mn+"',0");
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
         Iterator var8 = map.keySet().iterator();
 
@@ -313,14 +287,14 @@ public class WaterDataExcuter {
                 sql_field.append("," + factorCode + "_COU");
                 sql_field.append("," + factorCode + "_COU_STATE");
                 sql_field.append("," + factorCode + "_FLAG");
-                sql_value.append(",'"+bean.getMin()+"','"+bean.getMinState()+"','"+bean.getMax()+"'','"+bean.getMaxState()+"','"
-                        +bean.getAvg()+",'"+bean.getAvgState()+",'"+bean.getCou()+",'"+bean.getCouState()+",'"+bean.getFlag()+"");
+                sql_value.append(",'"+bean.getMin()+"','"+bean.getMinState()+"','"+bean.getMax()+"','"+bean.getMaxState()+"','"
+                        +bean.getAvg()+"','"+bean.getAvgState()+"','"+bean.getCou()+"','"+bean.getCouState()+"','"+bean.getFlag()+"'");
                 this.monitorDeviceService.setMHDData(mn, factorCode, cn, bean);
             }
         }
 
-        sql_field.append(sql_value).append(')');
-        this.baseDao.sqlExcute(SqlBuilder.buildSql(sql_field.toString(), params));
+        sql_field.append(sql_value).append(")");
+        this.baseDao.sqlExcute(sql_field.toString());
         if (cn.equals("2061")) {
             this.monitorService.setMnHourLastUpload(mn);
         } else if (cn.equals("2031")) {

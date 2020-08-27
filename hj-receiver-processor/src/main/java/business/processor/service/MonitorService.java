@@ -38,6 +38,7 @@ public class MonitorService{
             MonitorBean monitorBean = new MonitorBean();
             String mn = map.get("mn").toString();
             monitorBean.setMn(mn);
+            monitorBean.setMonitorId(map.get("id").toString());
             setMonitor(mn,monitorBean);
         }
     }

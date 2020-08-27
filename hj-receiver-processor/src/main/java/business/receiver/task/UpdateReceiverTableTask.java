@@ -94,7 +94,7 @@ public class UpdateReceiverTableTask {
 
     public static void setBakSourceQuerySql(String yyMM) {
         synchronized(bakSourceSql_query_hand) {
-            bakSourceSql_query_hand = "select * from sys_device_message_" + yyMM + " WHERE ID>''{0}'' and TAG = 0 order by ID asc limit 0," + countLimit + "";
+            bakSourceSql_query_hand = "select * from sys_device_message_" + yyMM + " WHERE TAG = 0 order by ID asc limit 0," + countLimit + "";
         }
 
         synchronized(bakSourceSql_update_hand) {

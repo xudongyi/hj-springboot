@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="dataReceiverProcessor2.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/third-libs/dataReceiverProcessor2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

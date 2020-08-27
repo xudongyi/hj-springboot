@@ -6,8 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="hj-receiver-processor" />
         <module name="hj-simulation" />
+        <module name="hj-receiver-processor" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -22,7 +22,7 @@
       <module name="hj-parser" options="-parameters" />
       <module name="hj-receiver-processor" options="-parameters" />
       <module name="hj-simulation" options="-parameters" />
-      <module name="hj-springboot" options="" />
+      <module name="hj-springboot" options="-parameters" />
     </option>
   </component>
 </project>

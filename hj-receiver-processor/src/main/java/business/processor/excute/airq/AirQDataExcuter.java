@@ -119,7 +119,7 @@ public class AirQDataExcuter {
         double avg;
         while(var13.hasNext()) {
             String factorCode = (String)var13.next();
-            if (updateTableFieldTask.isFieldExist(factorCode, 3)) {
+            if (updateTableFieldTask.isFieldExist(factorCode, FactorType.AIRQ.TYPE())) {
                 DataFactorBean bean = map.get(factorCode);
                 if (bean.getAvg() != null) {
                     avg = bean.getAvg();
