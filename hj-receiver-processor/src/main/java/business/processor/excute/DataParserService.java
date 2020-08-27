@@ -7,7 +7,12 @@ import java.util.Map;
 import business.processor.bean.DataFactorBean;
 import business.processor.bean.DataPacketBean;
 import business.processor.bean.FactorBean;
+import business.processor.excute.air.AirCurrentExcuter;
+import business.processor.excute.air.AirDataExcuter;
+import business.processor.excute.air.AirIncineratorExcuter;
 import business.processor.excute.airq.AirQDataExcuter;
+import business.processor.excute.voc.VocCurrentExcuter;
+import business.processor.excute.voc.VocDataExcuter;
 import business.processor.excute.water.TianzeSurplusExcuter;
 import business.processor.excute.water.WaterCurrentExcuter;
 import business.processor.excute.water.WaterDataExcuter;
@@ -21,9 +26,11 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service("dataParserService")
 @Slf4j
+@Transactional
 public class DataParserService {
     @Autowired
     private WaterCurrentExcuter waterCurrentExcuter;
@@ -31,6 +38,19 @@ public class DataParserService {
     private WaterDataExcuter waterDataExcuter;
     @Autowired
     private TianzeSurplusExcuter tianzeSurplusExcuter;
+
+    @Autowired
+    private AirCurrentExcuter airCurrentExcuter;
+    @Autowired
+    private AirDataExcuter airDataExcuter;
+    @Autowired
+    private AirIncineratorExcuter airIncineratorExcuter;
+
+    @Autowired
+    private VocCurrentExcuter vocCurrentExcuter;
+    @Autowired
+    private VocDataExcuter vocDataExcuter;
+
     @Autowired
     private AirQDataExcuter airQDataExcuter;
     @Autowired
@@ -262,10 +282,26 @@ public class DataParserService {
                         } else {
                             tag = this.waterDataExcuter.execute(dataPacketBean);
                         }
+                    }else if (st.equals("31")) {
+                        if (cn.equals("2011")) {
+                            tag = this.airCurrentExcuter.execute(dataPacketBean);
+                        } else if (!cn.equals("2051") && !cn.equals("2061") && !cn.equals("2031")) {
+                            if (cn.equals("3020")) {
+                                tag = this.airIncineratorExcuter.execute(dataPacketBean);
+                            }
+                        } else {
+                            tag = this.airDataExcuter.execute(dataPacketBean);
+                        }
                     }
                     else if (st.equals("22")) {
                         if (cn.equals("2061") || cn.equals("2031")) {
                             tag = this.airQDataExcuter.execute(dataPacketBean);
+                        }
+                    }else if (st.equals("27")) {
+                        if (cn.equals("2011")) {
+                            tag = this.vocCurrentExcuter.execute(dataPacketBean);
+                        } else if (cn.equals("2051") || cn.equals("2061") || cn.equals("2031")) {
+                            tag = this.vocDataExcuter.execute(dataPacketBean);
                         }
                     }
                 } else {

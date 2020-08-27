@@ -167,7 +167,7 @@ receive:
   hwstore : true
 process:
   hand:
-    open : true
+    open : false
     counts:
       persecond: 500
 data:

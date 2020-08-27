@@ -14,12 +14,14 @@ import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Slf4j
 @Service("airQDataExcuter")
+@Transactional
 public class AirQDataExcuter {
     @Autowired
     private MonitorService monitorService;
@@ -83,7 +85,7 @@ public class AirQDataExcuter {
         while(iterator.hasNext()) {
             String factorCode = (String)iterator.next();
             DataFactorBean bean = map.get(factorCode);
-            FactorBean factor = this.factorService.getFactors(3).get(factorCode);
+            FactorBean factor = this.factorService.getFactors(FactorType.AIRQ.TYPE()).get(factorCode);
             if (factor != null) {
                 MonitorDeviceBean device = this.monitorDeviceService.getDevice(monitorId, factorCode);
                 if (device != null) {
