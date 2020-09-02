@@ -49,7 +49,7 @@ public class AirQMonthTask {
         String endStr = DateUtil.format(end, "yyyy-MM-dd 00:00:00");
         String beginStr = DateUtil.format(begin, "yyyy-MM-dd 00:00:00");
         String year = CommonsUtil.dateCurrent("yyyy");
-        String lastDate = CommonsUtil.dateFormat(begin, "yyyyMM");
+        String lastDate = CommonsUtil.dateFormat(begin, "yyyy-MM");
         if (column.equals("year")) {
             lastDate = CommonsUtil.dateFormat(begin, "yyyy");
         }

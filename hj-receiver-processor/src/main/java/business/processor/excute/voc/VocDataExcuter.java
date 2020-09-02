@@ -111,19 +111,19 @@ public class VocDataExcuter {
         String mn = dataPacketBean.getMn();
         Date dataTime = dataPacketBean.getDataTime();
         Date month = CommonsUtil.dateParse(CommonsUtil.dateFormat(dataTime, "yyyyMM"), "yyyyMM");
-        List<Map<String, Object>> monthData = this.baseDao.sqlQuery("SELECT * FROM BAK_VOC_MONTH WHERE STATIC_TIME='"+CommonsUtil.dateFormat(dataTime, "yyyyMM")+"' AND MN='"+mn+"'");
+        List<Map<String, Object>> monthData = this.baseDao.sqlQuery("SELECT * FROM VOC_MONTH WHERE STATIC_TIME='"+CommonsUtil.dateFormat(dataTime, "yyyyMM")+"' AND MN='"+mn+"'");
         if (monthData == null || monthData.size()==0) {
-            this.insertMonthYearData(dataPacketBean, "BAK_VOC_MONTH", month);
+            this.insertMonthYearData(dataPacketBean, "VOC_MONTH", month);
         } else {
-            this.updateMonthYearData(dataPacketBean, "BAK_VOC_MONTH", monthData.get(0));
+            this.updateMonthYearData(dataPacketBean, "VOC_MONTH", monthData.get(0));
         }
 
         Date year = CommonsUtil.dateParse(CommonsUtil.dateFormat(dataTime, "yyyy"), "yyyy");
-        List<Map<String, Object>> yearData = this.baseDao.sqlQuery("SELECT * FROM BAK_VOC_YEAR WHERE STATIC_TIME='"+CommonsUtil.dateFormat(dataTime, "yyyy")+"' AND MN='"+mn+"'");
-        if (yearData == null) {
-            this.insertMonthYearData(dataPacketBean, "BAK_VOC_YEAR", year);
+        List<Map<String, Object>> yearData = this.baseDao.sqlQuery("SELECT * FROM VOC_YEAR WHERE STATIC_TIME='"+CommonsUtil.dateFormat(dataTime, "yyyy")+"' AND MN='"+mn+"'");
+        if (yearData == null || yearData.size()==0) {
+            this.insertMonthYearData(dataPacketBean, "VOC_YEAR", year);
         } else {
-            this.updateMonthYearData(dataPacketBean, "BAK_VOC_YEAR", yearData.get(0));
+            this.updateMonthYearData(dataPacketBean, "VOC_YEAR", yearData.get(0));
         }
 
     }
@@ -132,8 +132,7 @@ public class VocDataExcuter {
         StringBuilder sql_field = new StringBuilder();
         StringBuilder sql_value = new StringBuilder();
         sql_field.append("insert into " + tableName + "(ID,DATA_TIME,CREATE_TIME,STATIC_TIME,MN,TIMES");
-        sql_value.append(")VALUES(?,?,?,?,?,?");
-        sql_value.append(")VALUES('"+CommonsUtil.createUUID1()+"','"+dataPacketBean.getDataTime()+"','"
+        sql_value.append(")VALUES('"+CommonsUtil.createUUID1()+"','"+CommonsUtil.dateFormat(dataPacketBean.getDataTime())+"','"
                 +CommonsUtil.dateFormat(new Date())+"','"+CommonsUtil.dateFormat(staticTime)+"','"+dataPacketBean.getMn()+"',1");
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
         Iterator var8 = map.keySet().iterator();

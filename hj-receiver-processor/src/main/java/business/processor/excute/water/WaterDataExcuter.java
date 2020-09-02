@@ -65,7 +65,7 @@ public class WaterDataExcuter {
 
                 if (dataPacketBean.getCn().equals("2031")) {
                     this.reverseControlService.addendumDayData(dataPacketBean, monitor);
-                    this.companyScheduleService.saveScheduleByDayData(dataPacketBean, monitor, 1);
+                    this.companyScheduleService.saveScheduleByDayData(dataPacketBean, monitor, FactorType.WATER.TYPE());
                 }
             }
 
@@ -118,22 +118,22 @@ public class WaterDataExcuter {
         List<Object> params = new ArrayList();
         params.add(CommonsUtil.dateFormat(dataTime, "yyyyMM"));
         params.add(mn);
-        Map<String, Object> monthData = this.baseDao.sqlQuery(SqlBuilder.buildSql("SELECT * FROM BAK_WATER_MONTH WHERE STATIC_TIME=''{0}'' AND MN=''{1}''", params)).get(0);
-        if (monthData == null) {
+        List<Map<String, Object>> monthData = this.baseDao.sqlQuery(SqlBuilder.buildSql("SELECT * FROM WATER_MONTH WHERE STATIC_TIME=''{0}'' AND MN=''{1}''", params));
+        if (monthData == null|| monthData.size()==0) {
             this.insertMonthYearData(dataPacketBean, "WATER_MONTH", month,"yyyyMM");
         } else {
-            this.updateMonthYearData(dataPacketBean, "WATER_MONTH", monthData,"yyyyMM");
+            this.updateMonthYearData(dataPacketBean, "WATER_MONTH", monthData.get(0),"yyyyMM");
         }
 
         Date year = CommonsUtil.dateParse(CommonsUtil.dateFormat(dataTime, "yyyy"), "yyyy");
         params = new ArrayList();
         params.add(CommonsUtil.dateFormat(dataTime, "yyyy"));
         params.add(mn);
-        Map<String, Object> yearData = this.baseDao.sqlQuery(SqlBuilder.buildSql("SELECT * FROM WATER_YEAR WHERE STATIC_TIME=''{0}'' AND MN=''{1}''", params)).get(0);
-        if (yearData == null) {
+        List<Map<String, Object>> yearData = this.baseDao.sqlQuery(SqlBuilder.buildSql("SELECT * FROM WATER_YEAR WHERE STATIC_TIME=''{0}'' AND MN=''{1}''", params));
+        if (yearData == null || yearData.size()==0) {
             this.insertMonthYearData(dataPacketBean, "WATER_YEAR", year,"yyyy");
         } else {
-            this.updateMonthYearData(dataPacketBean, "WATER_YEAR", yearData,"yyyy");
+            this.updateMonthYearData(dataPacketBean, "WATER_YEAR", yearData.get(0),"yyyy");
         }
 
     }
@@ -142,7 +142,7 @@ public class WaterDataExcuter {
         StringBuilder sql_field = new StringBuilder();
         StringBuilder sql_value = new StringBuilder();
         sql_field.append("insert into " + tableName + "(ID,DATA_TIME,CREATE_TIME,STATIC_TIME,MN,TIMES");
-        sql_value.append(") VALUES('"+CommonsUtil.createUUID1()+"','"+CommonsUtil.dateFormat(dataPacketBean.getDataTime())+"','"+CommonsUtil.dateFormat(new Date())+"','"+staticTime+"','"+dataPacketBean.getMn()+"',0");
+        sql_value.append(") VALUES('"+CommonsUtil.createUUID1()+"','"+CommonsUtil.dateFormat(dataPacketBean.getDataTime())+"','"+CommonsUtil.dateFormat(new Date())+"','"+CommonsUtil.dateFormat(staticTime)+"','"+dataPacketBean.getMn()+"',0");
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
         Iterator var8 = map.keySet().iterator();
 

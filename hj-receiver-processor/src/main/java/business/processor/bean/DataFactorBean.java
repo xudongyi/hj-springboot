@@ -29,7 +29,7 @@ public class DataFactorBean {
     private Double zsCou = 0.0;
     private Integer zsCouState = 0;
     private String flag="N";
-    private String eFlag="N";
+    private String eFlag="0";
     private Date sampleTime;
     private Double today;
     private Double total;

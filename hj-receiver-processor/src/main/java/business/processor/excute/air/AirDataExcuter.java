@@ -138,7 +138,7 @@ public class AirDataExcuter {
         StringBuilder sql_field = new StringBuilder();
         StringBuilder sql_value = new StringBuilder();
         sql_field.append("insert into " + tableName + "(ID,DATA_TIME,CREATE_TIME,STATIC_TIME,MN,TIMES");
-        sql_value.append(")VALUES('"+CommonsUtil.createUUID1()+"','"+dataPacketBean.getDataTime()+"','"
+        sql_value.append(")VALUES('"+CommonsUtil.createUUID1()+"','"+CommonsUtil.dateFormat(dataPacketBean.getDataTime())+"','"
                 +CommonsUtil.dateFormat(new Date())+"','"+CommonsUtil.dateFormat(staticTime)+"','"+dataPacketBean.getMn()+"',1");
         Map<String, DataFactorBean> map = dataPacketBean.getDataMap();
         Iterator var8 = map.keySet().iterator();

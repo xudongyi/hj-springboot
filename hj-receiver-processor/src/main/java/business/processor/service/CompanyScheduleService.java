@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import business.ienum.FactorType;
 import business.processor.bean.*;
 import business.processor.task.UpdateTableFieldTask;
 import business.receiver.bean.MonitorBean;
@@ -39,11 +40,11 @@ public class CompanyScheduleService {
 
     public Map<String, Object> getScheduleData(Date dateTime, String cid, String mn, int type) {
         String tableName = "COM_SCHEDULE";
-        if (1 == type) {
+        if (FactorType.WATER.TYPE() == type) {
             tableName = "COM_SCHEDULE";
-        } else if (2 == type) {
+        } else if (FactorType.AIR.TYPE() == type) {
             tableName = "COM_SCHEDULE_AIR";
-        } else if (9 == type) {
+        } else if (FactorType.VOCS.TYPE() == type) {
             tableName = "COM_SCHEDULE_VOC";
         }
 
@@ -142,11 +143,11 @@ public class CompanyScheduleService {
 
     public Map<String, Object> getLastCouScheduleData(Date today, String cid, String mn, String factorCode, int type) {
         String tableName = "COM_SCHEDULE";
-        if (1 == type) {
+        if (FactorType.WATER.TYPE() == type) {
             tableName = "COM_SCHEDULE";
-        } else if (2 == type) {
+        } else if (FactorType.AIR.TYPE() == type) {
             tableName = "COM_SCHEDULE_AIR";
-        } else if (9 == type) {
+        } else if (FactorType.VOCS.TYPE() == type) {
             tableName = "COM_SCHEDULE_VOC";
         }
 
@@ -261,11 +262,11 @@ public class CompanyScheduleService {
                             if (!var19.hasNext()) {
                                 Map<String, Object> todayData = this.getScheduleData(dataDay, companyId, mn, factorType);
                                 factorCode = null;
-                                if (1 == factorType) {
+                                if (FactorType.WATER.TYPE() == factorType) {
                                     factorCode = "COM_SCHEDULE";
-                                } else if (2 == factorType) {
+                                } else if (FactorType.AIR.TYPE() == factorType) {
                                     factorCode = "COM_SCHEDULE_AIR";
-                                } else if (9 == factorType) {
+                                } else if (FactorType.VOCS.TYPE() == factorType) {
                                     factorCode = "COM_SCHEDULE_VOC";
                                 }
 
@@ -294,7 +295,7 @@ public class CompanyScheduleService {
                                     params.add(CommonsUtil.createUUID1());
                                     params.add(DateUtil.format(dataTime,DatePattern.PURE_DATE_PATTERN));
                                     params.add(DateUtil.formatDateTime(new Date()));
-                                    params.add(dataDay);
+                                    params.add(CommonsUtil.dateFormat(dataTime, "yyyyMMdd"));
                                     params.add(companyId);
                                     params.add(mn);
                                     Iterator var58 = result.keySet().iterator();

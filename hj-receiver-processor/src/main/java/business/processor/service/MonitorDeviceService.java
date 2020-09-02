@@ -150,7 +150,7 @@ public class MonitorDeviceService {
                                 List<Object> params = new ArrayList();
                                 params.add(Integer.valueOf(deviceStatus));
                                 params.add(device.getDeviceId());
-                                this.myBaseMapper.sqlExcute(SqlBuilder.buildSql("update mon_device set device_status={0} where device_id={1}", params));
+                                this.myBaseMapper.sqlExcute(SqlBuilder.buildSql("update site_monitor_device set device_state={0} where id=''{1}''", params));
                                 break;
                             }
                         }
@@ -193,10 +193,10 @@ public class MonitorDeviceService {
         if (lastDeviceStateData != null && lastDeviceStateData.size() > 0) {
             warnRule = lastDeviceStateData.get(0);
             params = new ArrayList();
-            params.add(now);
-            params.add(dataTime);
+            params.add(CommonsUtil.dateFormat(now));
+            params.add(CommonsUtil.dateFormat(dataTime));
             params.add(warnRule.get("ID"));
-            sql = "UPDATE DEVICE_STATE SET END_TIME=''{0}'',DATA_TIME=''{1}'' WHERE ID={2}";
+            sql = "UPDATE DEVICE_STATE SET END_TIME=''{0}'',DATA_TIME=''{1}'' WHERE ID=''{2}''";
             this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
             int lastState = (Integer) warnRule.get("STATE");
             if (lastState != Integer.valueOf(thisState)) {
@@ -211,12 +211,12 @@ public class MonitorDeviceService {
             params.add(CommonsUtil.createUUID1());
             params.add(mn);
             params.add(factorCode);
-            params.add(dataTime);
-            params.add(now);
-            params.add(now);
-            params.add(bean.getSampleTime());
+            params.add(CommonsUtil.dateFormat((dataTime)));
+            params.add(CommonsUtil.dateFormat(now));
+            params.add(CommonsUtil.dateFormat(now));
+            params.add(bean.getSampleTime()!=null?CommonsUtil.dateFormat(bean.getSampleTime()):CommonsUtil.dateFormat((dataTime)));
             params.add(Integer.valueOf(thisState));
-            sql = "INSERT INTO DEVICE_STATE(ID,MN,CODE,DATA_TIME,CREATE_TIME,END_TIME,SAMPLE_TIME,STATE) VALUES({0},''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'')";
+            sql = "INSERT INTO DEVICE_STATE(ID,MN,CODE,DATA_TIME,CREATE_TIME,END_TIME,SAMPLE_TIME,STATE) VALUES(''{0}'',''{1}'',''{2}'',''{3}'',''{4}'',''{5}'',''{6}'',''{7}'')";
             this.myBaseMapper.sqlExcute(SqlBuilder.buildSql(sql, params));
         }
 
@@ -229,7 +229,8 @@ public class MonitorDeviceService {
             }
 
             String warnMessage = monitor.getMonitorName() + "监测设备[" + device.getDeviceName() + "]于" + warnTime + "出现异常：" + this.getDeviceStatusDic().get(thisState) + "。";
-            this.warnService.checkWarnlog(bean.getDataTime(), warnRuleBean, 3, warnMessage, monitor, factorCode);
+            //TODO 111
+            //this.warnService.checkWarnlog(bean.getDataTime(), warnRuleBean, 3, warnMessage, monitor, factorCode);
         }
 
         this.setDeviceStatus(mn, factorCode, thisState);
